@@ -7,9 +7,10 @@ class Estudio(models.Model):
     medicoDerivante = models.ForeignKey('MedicoDerivante', on_delete=models.RESTRICT)
     empleadoCarga = models.ForeignKey('Empleado', on_delete=models.RESTRICT)
     tipoEstudio = models.CharField(max_length=100)
+    Estado = models.CharField(max_length=100)
     fechaAlta = models.DateField()
     presupuesto = models.DecimalField(decimal_places=2, max_digits=5)
-    diagnosticoPresuntivo = models.TextField()
+    diagnosticoPresuntivo = models.TextField(max_length=400)
     
 
 class Paciente(models.Model):
@@ -35,7 +36,7 @@ class MedicoDerivante(models.Model):
     apellido = models.CharField(max_length=100)
     email = models.EmailField(max_length=100)
     matricula = models.CharField(max_length=100)
-    telefono = models.IntegerField()
+    telefono = models.BigIntegerField()
 
 class ObraSocial(models.Model):
     id = models.AutoField(primary_key=True)
@@ -55,7 +56,7 @@ class Turno(models.Model):
     id = models.AutoField(primary_key=True)
     paciente = models.ForeignKey('Paciente', on_delete=models.RESTRICT)
     fecha = models.DateField()
-    hora = models.DateTimeField()
+    hora = models.TimeField()
 
 class Factura(models.Model):
     id = models.AutoField(primary_key=True)
@@ -66,3 +67,15 @@ class Factura(models.Model):
 
 class Lote(models.Model):
     id = models.AutoField(primary_key=True)
+
+class Historial(models.Model):
+    id = models.AutoField(primary_key=True)
+    paciente = models.ForeignKey('Paciente', on_delete=models.RESTRICT)
+    texto = models.CharField(max_length=200)
+    fecha = models.DateField()
+
+class Movimiento(models.Model):
+    id = models.AutoField(primary_key=True)
+    empleado = models.ForeignKey('Empleado', on_delete=models.RESTRICT)
+    fecha = models.DateField()
+    hora = models.TimeField()
