@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %} <h1>Estudios</h1> {% endblock %}
+
+{% block content %}
+<h2>Creacion de estudios</h2>
+<form action="{% url 'Estudios' %}" method="POST">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Cargar estudio">
+</form>
+{% endblock %}
