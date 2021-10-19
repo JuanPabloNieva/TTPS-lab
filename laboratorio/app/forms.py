@@ -12,3 +12,9 @@ class EstudioForm(forms.Form):
     medicoDerivante = forms.ModelChoiceField(queryset=MedicoDerivante.objects.distinct('nombre'), required=True)
     tipoEstudio = forms.CharField(max_length=100, required=True)
 
+class PacienteForm(forms.Form):
+    nombre = forms.CharField(label='Nombre', required=True)
+    apellido = forms.CharField(label='Apelldio', required=True)
+    dni = forms.IntegerField(label='DNI', help_text='Ingrese DNI sin puntos', required=True)
+    telefono = forms.CharField(label='Telefono', required=True)
+    obraSocial = forms.IntegerField(label='Obra Social', required=True)

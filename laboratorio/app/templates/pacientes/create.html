@@ -14,7 +14,7 @@
 <body>
     <div class="container">
         {% block body %}
-        <form action="" method="post"> {% csrf_token %}
+        <form action="{% url 'Pacientes' %}" method="post"> {% csrf_token %}
             <div class="row">
                 <div class="col-sm">
                     <div class="form-group">
@@ -49,7 +49,7 @@
                 <div class="col-sm">
                     <div class="form-group">
                         <label for="obraSocialPaciente">Obra Social</label>
-                        <select class="form-control" id="obraSocialPaciente">
+                        <select class="form-control" id="obraSocialPaciente" name="obraSocial">
                           {% for obra in obras %}
                             <option value="{{obra.id}}">{{obra.nombre}}</option>
                           {% endfor %}
