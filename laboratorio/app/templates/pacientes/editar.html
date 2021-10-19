@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %} <h1>Editar</h1> {% endblock %}
+
+
+{% block content %}
+<form action="/pacientes/editar/{{paciente.id}}" method="post"> {% csrf_token %}
+    <input type="hidden" name="id" value="{{paciente.id}}">
+    <div class="row">
+        <div class="col-sm">
+            <div class="form-group">
+                <label for="nombrePaciente">Nombre</label>
+                <input type="text" class="form-control" id="nombrePaciente" name="nombre"
+                    aria-describedby="nombreHelp" placeholder="Nombre" value="{{paciente.nombre}}" required>
+            </div>
+        </div>
+        <div class="col-sm">
+            <div class="form-group">
+                <label for="apellidoPaciente">Apellido</label>
+                <input type="text" class="form-control" id="apellidoPaciente" name="apellido"
+                    aria-describedby="apellidoHelp" placeholder="Apellido" value="{{paciente.apellido}}" required>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <label for="dniPaciente">DNI</label>
+            <input type="number" class="form-control" id="dniPaciente" name="dni"
+                aria-describedby="dniHelp" placeholder="11222333" value="{{paciente.dni}}" required>
+            <small id="dniHelp" class="form-text text-muted">Ingrese su DNI sin puntos</small>
+        </div>
+        <div class="col-sm">
+            <label for="telefonoPaciente">Telefono</label>
+            <input type="number" class="form-control" id="telefonoPaciente" name="telefono"
+                aria-describedby="telefonoHelp" placeholder="2235566677" value="{{paciente.telefono}}" required>
+            <small id="telefonoHelp" class="form-text text-muted">Ingrese su telefono sin "-"</small>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <div class="form-group">
+                <label for="obraSocialPaciente">Obra Social</label>
+                <select class="form-control" id="obraSocialPaciente" name="obraSocial">
+                  {% for obra in obras %}
+                    {% if obra.id == paciente.obraSocial.id %}
+                    <option value="{{obra.id}}" selected>{{obra.nombre}}</option>
+                    {% else %}
+                    <option value="{{obra.id}}" selected>{{obra.nombre}}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+</form>
+{% endblock %}
