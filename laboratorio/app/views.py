@@ -40,19 +40,49 @@ def nuevoEstudio(request):
                 id=request.POST['tipoEstudio']).first()
             paciente = Paciente.objects.filter(
                 id=request.POST['paciente']).first()
-            if not paciente:
-                pass
-            else:
+            try:
                 estudio = Estudio.objects.create(medicoDerivante=medicoDerivante, presupuesto=presupuesto, estado=estado, tipoEstudio=tipoEstudio,
                                                  empleadoCarga=empleado, fechaAlta=fechaAlta, paciente=paciente, diagnosticoPresuntivo=diagPresuntivo)
+            except:
+                pass  # falta agregar excepción
             return redirect('/estudios')
     else:
         form = EstudioForm()
-    medicosDerivantes = MedicoDerivante.objects.all()
-    pacientes = Paciente.objects.all()
-    tipoEstudios = TipoEstudio.objects.all()
-    return render(request, 'estudio/create.html', {'form': form, 'md': medicosDerivantes, 'tipoEstudios': tipoEstudios})
+        medicosDerivantes = MedicoDerivante.objects.all()
+        pacientes = Paciente.objects.all()
+        tipoEstudios = TipoEstudio.objects.all()
+        return render(request, 'estudio/create.html', {'form': form, 'md': medicosDerivantes, 'tipoEstudios': tipoEstudios})
 
+def editarEstudio(request, id):
+    if request.method == 'POST':
+        estudio = Estudio.objects.get(id=id)
+        medicoDerivante = MedicoDerivante.objects.get(id=request.POST['medicoDerivante'])
+        estudio.medicoDerivante = medicoDerivante
+
+        tipoEstudio = TipoEstudio.objects.get(id=request.POST['tipoEstudio'])
+        estudio.tipoEstudio = tipoEstudio
+
+        estudio.presupuesto = request.POST['presupuesto']
+        estudio.diagnosticoPresuntivo = request.POST['diagnosticoPresuntivo']
+
+        try:
+            estudio.save()
+        except:
+            pass
+        return redirect('/estudios')
+    else:
+        estudio = Estudio.objects.get(id=id)
+        initial_dict = {
+            'presupuesto': estudio.presupuesto,
+            'diagnosticoPresuntivo': estudio.diagnosticoPresuntivo,
+            'medicoDerivante': estudio.medicoDerivante,
+            'tipoEstudio': estudio.tipoEstudio
+        }
+        form = EstudioForm(initial_dict)   
+        medicosDerivantes = MedicoDerivante.objects.all()
+        pacientes = Paciente.objects.all()
+        tipoEstudios = TipoEstudio.objects.all()
+        return render(request, 'estudio/edit.html', {'form': form, 'md': medicosDerivantes, 'tipoEstudios': tipoEstudios, 'estudio':id})
 
 def pacientes(request):
     if request.method == 'POST':

@@ -46,7 +46,7 @@
       <td>{{estudio.fechaAlta}}</td>
       <td>{{estudio.presupuesto}}</td>
       <td><a href="#">Ver</a></td>
-      <td><a href="#" class="btn btn-info">Editar</a></td>
+      <td><a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info">Editar</a></td>
     </tr>
     {% endfor %}
   </tbody>
