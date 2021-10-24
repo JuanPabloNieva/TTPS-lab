@@ -6,22 +6,32 @@ class Estudio(models.Model):
     paciente = models.ForeignKey('Paciente', on_delete=models.RESTRICT)
     medicoDerivante = models.ForeignKey('MedicoDerivante', on_delete=models.RESTRICT)
     empleadoCarga = models.ForeignKey('Empleado', on_delete=models.RESTRICT)
-    tipoEstudio = models.CharField(max_length=100)
-    Estado = models.CharField(max_length=100)
+    tipoEstudio = models.ForeignKey('TipoEstudio', on_delete=models.RESTRICT)
+    estado = models.CharField(max_length=100)
+    abonado = models.BooleanField(null=False, default=False)
     fechaAlta = models.DateField()
-    presupuesto = models.DecimalField(decimal_places=2, max_digits=5)
+    presupuesto = models.DecimalField(decimal_places=2, max_digits=19)
     diagnosticoPresuntivo = models.TextField(max_length=400)
     
+class TipoEstudio(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100)
+
+    def __str__(self):
+        return u'{0}'.format(self.nombre)
 
 class Paciente(models.Model):
     id = models.AutoField(primary_key=True)
     obraSocial = models.ForeignKey('ObraSocial', on_delete=models.RESTRICT)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    dni = models.IntegerField()
-    telefono = models.IntegerField()
+    dni = models.BigIntegerField()
+    telefono = models.BigIntegerField()
     resumenHClinica = models.TextField(max_length=100)
-    numeroAfiliado = models.IntegerField()
+    numeroAfiliado = models.BigIntegerField()
+
+    def __str__(self):
+        return u'{0} {1} ({2})'.format(self.nombre, self.apellido, self.dni)
 
 class Empleado(models.Model):
     id = models.AutoField(primary_key=True)
@@ -38,18 +48,21 @@ class MedicoDerivante(models.Model):
     matricula = models.CharField(max_length=100)
     telefono = models.BigIntegerField()
 
+    def __str__(self):
+        return u'{0} {1}'.format(self.nombre, self.apellido)
+
 class ObraSocial(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     email = models.EmailField(max_length=100)
-    telefono = models.IntegerField()
+    telefono = models.BigIntegerField()
     
 class Muestra(models.Model):
     id = models.AutoField(primary_key=True)
     lote = models.ForeignKey('Lote', on_delete=models.RESTRICT)
     paciente = models.ForeignKey('Paciente', on_delete=models.RESTRICT)
     fecha = models.DateField()
-    numeroFreezer = models.IntegerField()
+    numeroFreezer = models.BigIntegerField()
     personaRetira = models.CharField(max_length=100)
 
 class Turno(models.Model):
@@ -63,7 +76,7 @@ class Factura(models.Model):
     paciente = models.ForeignKey('Paciente', on_delete=models.RESTRICT)
     estudio = models.ForeignKey('Estudio', on_delete=models.RESTRICT)
     fecha = models.DateField()
-    monto = models.IntegerField()
+    monto = models.FloatField()
 
 class Lote(models.Model):
     id = models.AutoField(primary_key=True)

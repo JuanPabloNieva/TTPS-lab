@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %} <h1>Pacientes</h1> {% endblock %}
+{% block title %} <h1 class="m-3 text-center">Pacientes</h1> {% endblock %}
 
 
 {% block content %}
+<a href="{% url 'Registrar Paciente' %}" class="btn btn-success mb-3">Crear Paciente</a>
 <table class="table table-striped">
   <thead class="thead-dark">
     <tr>

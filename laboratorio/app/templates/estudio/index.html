@@ -1,8 +1,76 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block title %}
+<h1 class="m-3 text-center">Estudios</h1>
+{% endblock %} {% block content %}
+<div class="row ml-1">
+  <a href="{% url 'Crear_Estudio' %}" class="btn btn-success mb-3 col-auto"
+    >Crear Estudio</a
+  >
+  <div class="col-auto w-25">
+    <input
+      class="form-control"
+      type="text"
+      id="filtroInputIndex"
+      onkeyup="filtro()"
+      placeholder="Buscar por texto"
+    />
+  </div>
+</div>
+<table class="table table-striped" id="estudios">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Paciente</th>
+      <th scope="col">Médico Derivante</th>
+      <th scope="col">Tipo Estudio</th>
+      <th scope="col">Estado</th>
+      <th scope="col">Abonado</th>
+      <th scope="col">Fecha Alta</th>
+      <th scope="col">Presupuesto</th>
+      <th scope="col">Diagnostico Presuntivo</th>
+      <th scope="col">Editar</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for estudio in estudios %}
+    <tr>
+      <td id='paciente'>{{estudio.paciente.nombre}} {{estudio.paciente.apellido}}</td>
+      <td>
+        {{estudio.medicoDerivante.nombre}} {{estudio.medicoDerivante.apellido}}
+      </td>
+      <td>{{estudio.tipoEstudio}}</td>
+      <td>{{estudio.estado}}</td>
+      {% if estudio.abonado %}
+      <td>SI</td>
+      {% else %}
+      <td>NO</td>
+      {% endif %}
+      <td>{{estudio.fechaAlta}}</td>
+      <td>{{estudio.presupuesto}}</td>
+      <td><a href="#">Ver</a></td>
+      <td><a href="#" class="btn btn-info">Editar</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-{% block title %} <h1>Estudios</h1> {% endblock %}
-
-{% block content %}
-<h2>Listado de estudios</h2>
-<a href="{% url 'Estudios' %}">Crear Estudio</a>
+<script>
+  function filtro() {
+    let input, filter, table, opt, td, i, txtValue;
+    input = document.getElementById("filtroInputIndex");
+    filter = input.value.toUpperCase();
+    elementos = document.getElementById("estudios");
+    tr = elementos.getElementsByTagName("tr");
+    for (i = 1; i < tr.length; i++) {
+      td = tr[i];
+      console.log(td)
+      if (td) {
+        txtValue = td.textContent || td.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          tr[i].style.display = "";
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+  }
+</script>
 {% endblock %}
