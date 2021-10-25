@@ -10,6 +10,9 @@ urlpatterns = [
     path('pacientes/nuevo', views.nuevoPaciente, name='Registrar Paciente'),
     path('pacientes/eliminar/<id>', views.eliminarPaciente),
     path('pacientes/editar/<id>', views.editarPaciente),
+    path('historial', views.historial, name='Historial'),
+    path('historial/nuevo/<id>',views.nuevoHistorial, name="Agregar Historial"),
+    path('historial/paciente/<id>', views.historialPaciente),
     path('empleados', views.empleados, name='Empleados'),
     path('pendientes', views.pendientes, name='Pendientes'),
     path('login', views.login, name='Login')

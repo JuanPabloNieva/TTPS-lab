@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %} <h1> Historial de: {{paciente.nombre}} {{paciente.apellido}}</h1> {% endblock %}
+
+
+{% block content %}
+
+<a href="/historial/nuevo/{{paciente.id}}" class="btn btn-info">AGREGAR HISTORIAL</a>
+
+<div id="accordion">
+
+    {% for historia in historial %}
+    <div class="card">
+        <div class="card-header" id="headingOne">
+            <div class="col-sm-8 expand-btn">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{historia.id}}"
+                        aria-expanded="true" aria-controls="collapseOne">
+                        Fecha: {{historia.fecha}}
+                    </button>
+                </h5>
+            </div>
+            <div class="col-sm-2 edit-btn">
+                <button class="btn disable">editar</button>
+            </div>
+            <div class="col-sm-2 remove-btn">
+                <button class="btn ">eliminar</button>
+            </div>
+        </div>
+
+        <div id="collapse{{historia.id}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+            <div class="card-body">
+                <p>{{historia.texto}}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}
