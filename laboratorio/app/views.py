@@ -157,3 +157,15 @@ def historialPaciente(request, id):
     paciente = Paciente.objects.filter(id=id).first()
     historial = Historial.objects.filter(paciente_id=paciente.id)
     return render(request, 'historial/index.html', {"paciente":paciente, "historial":historial})
+
+#------Pendientes---------
+def pendientes(request):
+    estudiosPendientes = Estudio.objects.filter(abonado=False)
+    return render(request, "estudio/pendientes.html", {"estudios":estudiosPendientes})
+
+def pagarEstudios(request):
+    print(request.POST)
+    #estudiosPagar = Estudio.objects.get(id in request.POST['estudios'])
+    #print(estudiosPagar)
+    estudiosPendientes = Estudio.objects.filter(abonado=False)
+    return render(request, "estudio/pendientes.html", {"estudios":estudiosPendientes})
