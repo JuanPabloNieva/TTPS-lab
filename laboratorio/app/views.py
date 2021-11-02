@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render, HttpResponseRedirect, HttpResponse
 from django.urls.conf import path
-from .models import Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial
+from .models import Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial, Estado
 from django.template.loader import get_template
 from .forms import EstudioForm, LoginForm, PacienteForm, HistorialForm
 import random
@@ -35,7 +35,7 @@ def nuevoEstudio(request):
             empleado = Empleado.objects.filter(id=1).first()
             fechaAlta = datetime.today()
             diagPresuntivo = request.POST['diagnosticoPresuntivo']
-            estado = 'Esperando comprobante de pago'
+            estado = Estado.objects.all().first()
             tipoEstudio = TipoEstudio.objects.filter(
                 id=request.POST['tipoEstudio']).first()
             paciente = Paciente.objects.filter(
@@ -160,12 +160,23 @@ def historialPaciente(request, id):
 
 #------Pendientes---------
 def pendientes(request):
-    estudiosPendientes = Estudio.objects.filter(abonado=False)
+    estudiosPendientes = []
+    estudiosSinAbonar = Estudio.objects.filter(abonado=False)
+    is_valid = lambda estudio : estudio.estado.id > 7
+
+    for estudio in estudiosSinAbonar:
+        if is_valid(estudio):
+            estudiosPendientes.append(estudio)
     return render(request, "estudio/pendientes.html", {"estudios":estudiosPendientes})
 
 def pagarEstudios(request):
     print(request.POST)
-    #estudiosPagar = Estudio.objects.get(id in request.POST['estudios'])
-    #print(estudiosPagar)
-    estudiosPendientes = Estudio.objects.filter(abonado=False)
-    return render(request, "estudio/pendientes.html", {"estudios":estudiosPendientes})
+    abonar = request.POST.getlist('estudios[]')
+    
+    for id in abonar:
+        estudio = Estudio.objects.filter(id=id).first()
+        estudio.abonado = True
+        estudio.save() 
+
+  
+    return redirect('/pendientes')

@@ -7,7 +7,7 @@ class Estudio(models.Model):
     medicoDerivante = models.ForeignKey('MedicoDerivante', on_delete=models.RESTRICT)
     empleadoCarga = models.ForeignKey('Empleado', on_delete=models.RESTRICT)
     tipoEstudio = models.ForeignKey('TipoEstudio', on_delete=models.RESTRICT)
-    estado = models.CharField(max_length=100)
+    estado = models.ForeignKey('Estado', on_delete=models.DO_NOTHING)
     abonado = models.BooleanField(null=False, default=False)
     fechaAlta = models.DateField()
     presupuesto = models.DecimalField(decimal_places=2, max_digits=19)
@@ -92,3 +92,8 @@ class Movimiento(models.Model):
     empleado = models.ForeignKey('Empleado', on_delete=models.RESTRICT)
     fecha = models.DateField()
     hora = models.TimeField()
+
+class Estado(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre =  models.CharField(max_length=100)
+    detalle =  models.CharField(max_length=300)

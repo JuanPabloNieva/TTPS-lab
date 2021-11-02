@@ -34,13 +34,13 @@
                     {{estudio.medicoDerivante.nombre}} {{estudio.medicoDerivante.apellido}}
                 </td>
                 <td>{{estudio.tipoEstudio}}</td>
-                <td>{{estudio.estado}}</td>
+                <td>{{estudio.estado.nombre}}</td>
                 <td>{{estudio.fechaAlta}}</td>
                 <td>{{estudio.presupuesto}}</td>
                 <td class="text-center">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" value="{{estudio.id}}" name="estudios[]"
-                            id="flexCheckDefault">
+                            id="flexCheckDefault" required >
                     </div>
                 </td>
             </tr>
