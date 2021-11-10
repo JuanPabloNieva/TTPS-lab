@@ -29,3 +29,7 @@ class PacienteForm(forms.Form):
         label='DNI', help_text='Ingrese DNI sin puntos', required=True)
     telefono = forms.CharField(label='Telefono', required=True)
     obraSocial = forms.IntegerField(label='Obra Social', required=True)
+
+class HistorialForm(forms.Form):
+    paciente = forms.IntegerField(label='Paciente', required=True)
+    texto = forms.CharField(label='Detalles', widget=forms.Textarea, min_length=0, max_length=400, required=True)

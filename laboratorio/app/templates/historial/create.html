@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %} <h1>Agregar Historial</h1> {% endblock %}
+
+
+{% block content %}
+
+{% if error %}
+    <p> {{error}}</p>
+{% endif %}
+<form action="{% url 'Historial' %}" method="post"> {% csrf_token %}
+
+    <div class="row">
+        <div class="col-sm">
+            <div class="form-group">
+                <label for="paciente">Paciente</label>
+                <select class="form-control" id="paciente" name="paciente">
+                    <option value="{{paciente.id}}">{{paciente.apellido}}  {{paciente.nombre}}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <div class="form-group">
+                <label for="detalle">Detalle</label>
+                <textarea class="form-control" id="detalle" rows="5" name="texto"></textarea>
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Registrar</button>
+</form>
+{% endblock %}
