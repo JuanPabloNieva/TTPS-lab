@@ -1,0 +1,27 @@
+{% extends 'base.html' %} {% block title %}
+<h1 class="m-3 text-center">Turnos disponibles para {{ form.fecha.value }}</h1>
+{% endblock %} {% block content %}
+<a href="{% url 'Estudios' %}" class="">Volver</a>
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+    <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+    </li>
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<div class="m-3">
+<form action="{% url 'Seleccionar_Turno' id=estudio.id %}" method="POST">
+  {% csrf_token %}
+  {{ form.fecha.label }}
+  {{ form.fecha }}
+  {{ form.fecha.errors }}
+  {{ form.hora.label }}
+  {{ form.hora }}
+  <input type="submit" class="btn btn-primary" value="Guardar Turno" />
+</form>
+</div>
+{% endblock %}

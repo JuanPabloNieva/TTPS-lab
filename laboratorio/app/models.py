@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.fields.related import ForeignKey
 
 # Create your models here.
 class Estudio(models.Model):
@@ -40,6 +41,9 @@ class Empleado(models.Model):
     usuario = models.CharField(max_length=100)
     contraseña = models.CharField(max_length=100)
 
+    def __str__(self):
+        return u'{0} {1}'.format(self.nombre, self.apellido)
+
 class MedicoDerivante(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
@@ -67,13 +71,12 @@ class Muestra(models.Model):
 
 class Turno(models.Model):
     id = models.AutoField(primary_key=True)
-    paciente = models.ForeignKey('Paciente', on_delete=models.RESTRICT)
+    estudio = models.ForeignKey('Estudio', on_delete=models.RESTRICT)
     fecha = models.DateField()
     hora = models.TimeField()
 
 class Factura(models.Model):
     id = models.AutoField(primary_key=True)
-    paciente = models.ForeignKey('Paciente', on_delete=models.RESTRICT)
     estudio = models.ForeignKey('Estudio', on_delete=models.RESTRICT)
     fecha = models.DateField()
     monto = models.FloatField()
@@ -97,3 +100,24 @@ class Estado(models.Model):
     id = models.AutoField(primary_key=True)
     nombre =  models.CharField(max_length=100)
     detalle =  models.CharField(max_length=300)
+
+class Comprobante(models.Model):
+    id = models.AutoField(primary_key=True)
+    estudio = models.ForeignKey('Estudio', on_delete=models.RESTRICT)
+    archivo = models.FileField(upload_to='comprobantes/')
+
+class Consentimiento(models.Model):
+    id = models.Aggregate(primary_key=True)
+    tipoEstudio = models.ForeignKey('TipoEstudio', on_delete=models.RESTRICT)
+    archivo = models.FileField(upload_to='consentimientos/')
+
+    def __str__(self):
+        return '{0}'.format(self.tipoEstudio)
+
+class ConsentimientoFirmado(models.Model):
+    id = models.Aggregate(primary_key=True)
+    estudio = models.ForeignKey('Estudio', on_delete=models.RESTRICT)
+    archivo = models.FileField(upload_to='consentimientosFirmados/')
+
+    def __str__(self):
+        return '{0}'.format(self.tipoEstudio)

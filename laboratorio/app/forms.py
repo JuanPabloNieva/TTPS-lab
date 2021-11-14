@@ -1,5 +1,11 @@
+import datetime
+from random import choice, choices
 from django import forms
+from django.core.exceptions import ValidationError
+from django.forms import widgets
+from django.forms.widgets import ChoiceWidget, DateInput, SelectDateWidget, Widget
 from app.models import Paciente, MedicoDerivante, TipoEstudio
+from datetime import date
 
 
 class LoginForm(forms.Form):
@@ -30,6 +36,54 @@ class PacienteForm(forms.Form):
     telefono = forms.CharField(label='Telefono', required=True)
     obraSocial = forms.IntegerField(label='Obra Social', required=True)
 
+
 class HistorialForm(forms.Form):
     paciente = forms.IntegerField(label='Paciente', required=True)
-    texto = forms.CharField(label='Detalles', widget=forms.Textarea, min_length=0, max_length=400, required=True)
+    texto = forms.CharField(label='Detalles', widget=forms.Textarea,
+                            min_length=0, max_length=400, required=True)
+
+
+class ComprobanteForm(forms.Form):
+    archivo = forms.FileField(label='Comprobante de pago')
+
+
+class ConsentimientoForm(forms.Form):
+    archivo = forms.FileField(label='Consentimiento firmado por el paciente')
+
+
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
+class TimeInput(forms.TimeInput):
+    input_type = 'time'
+
+
+class TurnoForm(forms.Form):
+    fecha = forms.DateField(label='Fecha', widget=DateInput(attrs={'readonly':'readonly'}), required=True)
+    hora = forms.ChoiceField(label='Hora', required=True)
+
+    def __init__(self, choices, *args, **kwargs):
+        super(TurnoForm, self).__init__(*args, **kwargs)
+        self.fields['hora'].choices = choices
+
+
+class TurnoFechaForm(forms.Form):
+
+    fecha = forms.DateField(label='Fecha', widget=DateInput, required=True)
+
+    def clean_fecha(self):
+        data = self.cleaned_data['fecha']
+
+        if data < datetime.date.today():
+            raise forms.ValidationError(
+                ('Fecha Invalida - No puede sacar un turno para una fecha pasada'))
+
+        if date(data.year, data.month, data.day).weekday() == 5 or date(data.year, data.month, data.day).weekday() == 6:
+            raise forms.ValidationError(('Fecha Invalida - Los turnos se dan unicamente de Lunes a Viernes'))
+
+        return data
+
+class MuestraForm(forms.Form):
+    pass
+

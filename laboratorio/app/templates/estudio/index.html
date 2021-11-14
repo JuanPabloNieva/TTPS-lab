@@ -26,13 +26,15 @@
       <th scope="col">Fecha Alta</th>
       <th scope="col">Presupuesto</th>
       <th scope="col">Diagnostico Presuntivo</th>
-      <th scope="col">Editar</th>
+      <th scope="col">Acciones</th>
     </tr>
   </thead>
   <tbody>
     {% for estudio in estudios %}
     <tr>
-      <td id='paciente'>{{estudio.paciente.nombre}} {{estudio.paciente.apellido}}</td>
+      <td id="paciente">
+        {{estudio.paciente.nombre}} {{estudio.paciente.apellido}}
+      </td>
       <td>
         {{estudio.medicoDerivante.nombre}} {{estudio.medicoDerivante.apellido}}
       </td>
@@ -46,13 +48,48 @@
       <td>{{estudio.fechaAlta}}</td>
       <td>{{estudio.presupuesto}}</td>
       <td><a href="#">Ver</a></td>
-      <td><a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info">Editar</a></td>
+      <td>
+        {% if estudio.estado.detalle == "1" %}
+        <a
+          href="{% url 'Cargar_Comprobante' id=estudio.id %}"
+          class="btn btn-warning mb-2"
+          >Cargar comprobante</a
+        >
+        {% elif estudio.estado.detalle == "2" %}
+        <a
+          href="{% url 'Descargar_Consentimiento' id=estudio.id %}"
+          class="btn btn-warning mb-2"
+          onclick="recargar()"
+          >Descargar consentimiento</a
+        >
+        {% elif estudio.estado.detalle == "3" %}
+        <a href="{% url 'Cargar_Consentimiento' id=estudio.id %}" class="btn btn-warning mb-2">Cargar consentimiento</a>
+        {% elif estudio.estado.detalle == "4" %}
+        <a href="{% url 'Buscar_Turno' id=estudio.id %}" class="btn btn-warning mb-2">Seleccionar turno</a>
+        {% elif estudio.estado.detalle == "5" %}
+        <a href="#" class="btn btn-warning mb-2">Cargar muestra</a>
+        {% elif estudio.estado.detalle == "6" %}
+        <a href="#" class="btn btn-warning mb-2">Cargar retiro muestra</a>
+        {% elif estudio.estado.detalle == "8" %}
+        <a href="#" class="btn btn-warning mb-2">Cargar interpretación</a>
+        {% elif estudio.estado.detalle == "9" %}
+        <a href="#" class="btn btn-warning mb-2">Enviar estudio</a>
+        {% endif %}
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
+          >Editar</a
+        >
+      </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
 <script>
+  function recargar() {
+    setTimeout(function () {
+      location.reload();
+    }, 400);
+  }
   function filtro() {
     let input, filter, table, opt, td, i, txtValue;
     input = document.getElementById("filtroInputIndex");
@@ -61,7 +98,7 @@
     tr = elementos.getElementsByTagName("tr");
     for (i = 1; i < tr.length; i++) {
       td = tr[i];
-      console.log(td)
+      console.log(td);
       if (td) {
         txtValue = td.textContent || td.innerText;
         if (txtValue.toUpperCase().indexOf(filter) > -1) {
