@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %} <h1 class="text-center"> Cantidad de Estudios por Mes </h1> {% endblock %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col-12 w-auto">
+        {% autoescape off %}
+        {{ plot_div }}
+        {% endautoescape %}
+    </div>
+</div>
+{% endblock %}

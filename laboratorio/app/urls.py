@@ -17,5 +17,9 @@ urlpatterns = [
     path('historial/paciente/<id>', views.historialPaciente),
     path('empleados', views.empleados, name='Empleados'),
     path('pendientes', views.pendientes, name='Pendientes'),
-    path('login', views.login, name='Login')
+    path('login', views.login, name='Login'),
+    path('graficos', views.graficos, name="Graficos"),
+    path('graficos/cantidadPorTipo', views.cantXTipo, name="Graficos_Tipo"),
+    path('graficos/cantidadPorMes', views.cantXMes, name="Graficos_Mes"),
+    path('graficos/tiempoDeDemora', views.boxplot, name="Graficos_Boxplot")
 ]

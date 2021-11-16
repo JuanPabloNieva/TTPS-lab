@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}
+
+<h1>Estadisticas</h1>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-6 col-sm-12 col-md-6">
+        <div class="card w-auto" ><!--
+            <img class="card-img-top" src="{{'/graficos/img/grafico-barra.png'}}" alt="Card image cap">-->
+            <div class="card-body">
+                <h5 class="card-title">Cantidad de Estudios por Tipo</h5>
+                <p class="card-text">Grafico de barras que muestra la cantidad de Estudios
+                    que se han realizado por el tipo de Estudio.</p>
+                <a href="{% url 'Graficos_Tipo' %}" class="btn btn-primary">Ver Grafico</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-sm-12 col-md-6">
+        <div class="card w-auto" >
+           <!-- <img class="card-img-top" src="..." alt="Card image cap">-->
+            <div class="card-body">
+                <h5 class="card-title">Cantidad de Estudios por Mes</h5>
+                <p class="card-text">Grafico de Barras que muestra la cantidad total de Estudios
+                    mensuales que se han realizado en el año.</p>
+                <a href="{% url 'Graficos_Mes' %}" class="btn btn-primary">Ver Grafico</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-2">
+    <div class="col-6 col-sm-12 col-md-6">
+        <div class="card w-auto" >
+           <!-- <img class="card-img-top" src="..." alt="Card image cap">-->
+            <div class="card-body">
+                <h5 class="card-title">Tiempo medio de Demora</h5>
+                <p class="card-text">Grafico Boxplot que muestra los tiempos que demora 
+                    desde la toma de muestra hasta que se le entrega al médico derivante, por año.</p>
+                <a href="{% url 'Graficos_Boxplot' %}" class="btn btn-primary">Ver Grafico</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
