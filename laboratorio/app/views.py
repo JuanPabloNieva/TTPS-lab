@@ -5,6 +5,7 @@ from django.http import FileResponse
 from django.shortcuts import redirect, render, HttpResponseRedirect, HttpResponse
 from django.template import loader
 from django.urls.conf import path
+from .models import Muestra, Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial, Estado
 from django.template.loader import get_template
 from django.contrib import messages
 from reportlab.lib.enums import TA_CENTER
@@ -25,6 +26,11 @@ import pdfkit
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
+from datetime import date, datetime, timedelta
+
+from plotly.offline import plot
+import plotly.graph_objects as go
+#import plotly.express as px
 
 # Create your views here.
 
@@ -549,3 +555,158 @@ def resultado_entregado(request, id):
 
     messages.success(request, '¡Estudio {0} finalizado!'.format(estudio.id))
     return redirect('/estudios')
+    
+    for id in abonar:
+        estudio = Estudio.objects.filter(id=id).first()
+        estudio.abonado = True
+        estudio.save() 
+
+  
+    return redirect('/pendientes')
+
+
+#------Graficos---------
+def graficos(request):
+    return render(request, "graficos/index.html")
+
+def cantXTipo(request):
+    """ 
+    View demonstrating how to display a graph object
+    on a web page with Plotly. 
+    """
+    #Me traigo todos los tipos
+
+    tiposDeEstudios = TipoEstudio.objects.all()
+
+    type=[]
+    x = []
+    y = []
+    estudios = Estudio.objects.values_list('tipoEstudio_id')
+
+    
+    for tipo in tiposDeEstudios:
+        count=0
+        type.append(tipo.nombre)
+        x.append(tipo.id)
+        for estudio in estudios:
+            if(estudio[0]==tipo.id):
+                count=count+1
+        y.append(count)
+            
+    # List of graph objects for figure.
+    # Each object will contain on series of data.
+    graphs = []
+
+    # Adding linear plot of y1 vs. x.
+    #graphs.append(
+    #    go.Scatter(x=x, y=y1, mode='lines', name='Line y1')
+    #)
+
+    # Adding scatter plot of y2 vs. x. 
+    # Size of markers defined by y2 value.
+    #graphs.append(
+    #    go.Scatter(x=x, y=y2, mode='markers', opacity=0.8, 
+    #               marker_size=y2, name='Scatter y2')
+    #)
+
+    # Adding bar plot of y3 vs x.
+    
+    graphs.append(
+        go.Bar(x=x, y=y, name='Cantidad por tipo de estudio') 
+    )
+
+    # Setting layout of the figure.
+    layout = {
+        'title': 'Cantidad de Estudios por Tipo',
+        'xaxis_title': 'Tipo de Estudio ',
+        'yaxis_title': 'Cantidad',
+        'height': 420,
+        'width': 560
+    }
+
+    # Getting HTML needed to render the plot.
+    plot_div = plot({'data': graphs, 'layout': layout}, 
+                    output_type='div')
+    return render(request,"graficos/cantXTipo.html", {'plot_div': plot_div, 'tiposDeEstudios':tiposDeEstudios})
+
+def cantXMes(request):
+    """ 
+    View demonstrating how to display a graph object
+    on a web page with Plotly. 
+    """
+    #Me traigo todos los tipos
+
+    month=['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+    x = [0,0,0,0,0,0,0,0,0,0,0,0]
+    y = [0,0,0,0,0,0,0,0,0,0,0,0]
+    estudios = Estudio.objects.all()
+    
+    for estudio in estudios:
+        y[estudio.fechaAlta.month-1]= y[estudio.fechaAlta.month-1] + 1
+            
+    graphs = []
+    
+    graphs.append(
+        go.Bar(x=month, y=y, name='Cantidad por tipo de estudio') 
+    )
+
+    # Setting layout of the figure.
+    layout = {
+        'xaxis_title': 'Tipo de Estudio ',
+        'yaxis_title': 'Cantidad',
+        'height': 640,
+        'width': 900
+    }
+
+    # Getting HTML needed to render the plot.
+    plot_div = plot({'data': graphs, 'layout': layout}, 
+                    output_type='div')
+    return render(request,"graficos/cantXMes.html", {'plot_div': plot_div})
+
+def boxplot(request):
+   
+    y = []
+    estudios = Estudio.objects.all()
+    muestras = Muestra.objects.all()
+
+    filtro=[]
+    for estudio in estudios:
+        for muestra in muestras:
+            if muestra.paciente.id == estudio.paciente.id:
+                filtro.append({"estudio":estudio, "muestra":muestra})
+
+    # Tenes que tomar la fecha fin del estudio y hacer lo 
+    # que hago con fecha de inicio. Y mete estas lineas
+    # dentro del for
+    fechaFin = datetime.now().strftime("%Y-%m-%d")
+    fin = datetime.strptime(fechaFin, '%Y-%m-%d')
+    #-------------------------------------------------
+    
+    for elem in filtro:
+        # ejemplo 
+        # fechaFin = elem['estudio'].fechaFin.strftime("%Y-%m-%d")
+        # fin = datetime.strptime(fechaFin, '%Y-%m-%d')
+        fechaInicio = elem['muestra'].fecha.strftime("%Y-%m-%d")
+        inicio =  datetime.strptime(fechaInicio, '%Y-%m-%d')
+        
+        y.append((fin - inicio).days)
+
+    graphs = []
+    
+    graphs.append(
+        go.Box( y=y, name="Días") 
+    )
+
+    # Setting layout of the figure.
+    layout = {
+        'xaxis_title': 'Tiempo promedio de demora ',
+        'yaxis_title': 'Cantidad de Días',
+        'height': 640,
+        'width': 900
+    }
+
+    # Getting HTML needed to render the plot.
+    plot_div = plot({'data': graphs, 'layout': layout}, 
+                    output_type='div')
+
+    return render(request,"graficos/boxplot.html",  {'plot_div': plot_div})
