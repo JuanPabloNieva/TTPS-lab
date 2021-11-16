@@ -6,9 +6,16 @@
 <div>
 <ul >
     {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
-    <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
-    </li>
+
+      {% if message.tags == 'error'  %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
     {% endfor %}
 </ul>
 </div>
@@ -16,12 +23,19 @@
 <div class="m-3">
 <form action="{% url 'Seleccionar_Turno' id=estudio.id %}" method="POST">
   {% csrf_token %}
-  {{ form.fecha.label }}
-  {{ form.fecha }}
-  {{ form.fecha.errors }}
-  {{ form.hora.label }}
-  {{ form.hora }}
-  <input type="submit" class="btn btn-primary" value="Guardar Turno" />
+<div class="row">
+  <div class="col-sm">
+    <div class="form-group">
+      <label for="{{ form.fecha.id_for_label }}">{{ form.fecha.label }}</label>
+      {{ form.fecha }}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.hora.id_for_label }}">{{ form.hora.label }}</label>
+      {{ form.hora }}
+    </div>
+  </div>
+</div>
+  <input type="submit" class="btn btn-primary w-50" value="Guardar Turno" />
 </form>
 </div>
 {% endblock %}

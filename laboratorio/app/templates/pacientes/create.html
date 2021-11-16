@@ -1,8 +1,9 @@
 {% extends 'base.html' %} {% block title %}
-<h1 class="m-3 text-center">Pacientes</h1>
+<h1 class="m-3 text-center">Crear paciente</h1>
 {% endblock %}
 {% block content %}
-<form action="{% url 'Pacientes' %}" method="post">
+<a href="{% url 'Pacientes' %}" class="mb-5">Volver</a>
+<form action="{% url 'Pacientes' %}" class="mt-5" method="post">
   {% csrf_token %}
   <div class="row">
     <div class="col-sm">
@@ -71,6 +72,7 @@
       <div class="form-group">
         <label for="obraSocialPaciente">Obra Social</label>
         <select class="form-control" id="obraSocialPaciente" name="obraSocial">
+          <option value="0">--Seleccionar Obra Social--</option>
           {% for obra in obras %}
           <option value="{{obra.id}}">{{obra.nombre}}</option>
           {% endfor %}
@@ -78,7 +80,7 @@
       </div>
     </div>
   </div>
-  <button type="submit" class="btn btn-primary">Registrar</button>
+  <button type="submit" class="btn btn-primary">Cargar paciente</button>
 </form>
 
 {% endblock %}

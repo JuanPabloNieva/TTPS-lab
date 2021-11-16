@@ -5,14 +5,32 @@
 {% endblock %}
 
 {% block content %}
-<div class="row ml-1">
-    <div class="col-auto w-25">
-        <label for="filtroInputIndex">Filtrar</label>
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+
+    {% if message.tags == 'error'  %}
+        <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+    {% else %}
+        <li{% if message.tags %} class="{{ message.tags }} messages alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+    {% endif %}
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<div class="row m-2">
+    <div class="form-inline">
+        <!-- <label for="filtroInputIndex" class="form-">Filtrar</label> -->
         <input class="form-control" type="text" id="filtroInputIndex" onkeyup="filtro()"
             placeholder="Buscar por texto" />
     </div>
 </div>
-<table class="table table-striped" id="estudios">
+<table class="table table-striped mt-2" id="estudios">
     <thead class="thead-dark">
         <tr>
             <th scope="col">Paciente</th>
@@ -46,7 +64,7 @@
             </tr>
             {% endfor %}
         </tbody>
-        <input type="submit" class="btn btn-primary" value="Pagar" />
+        <input type="submit" class="btn btn-success ml-2" value="Pagar" />
     </form>
 </table>
 

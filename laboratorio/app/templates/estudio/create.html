@@ -1,7 +1,8 @@
 {% extends 'base.html' %} {% block title %}
-<h1 class="m-3 text-center">Estudios</h1>
+<h1 class="m-3 text-center">Crear estudio</h1>
 {% endblock %} {% block content %}
-<form action="{% url 'Crear_Estudio' %}" method="POST">
+<a href="{% url 'Estudios' %}" class="mb-5">Volver</a>
+<form action="{% url 'Crear_Estudio' %}" class="mt-5" method="POST">
   {% csrf_token %}
   <div class="row">
     <div class="col-sm">
@@ -39,7 +40,7 @@
   <div class="row">
     <div class="col-sm">
       <div class="form-group">
-        <label for="{{ form.medicoDerivante.id_for_label }}"
+        <label for="{{ form.patologia.id_for_label }}"
           >Médico Derivante</label
         >
         {{ form.medicoDerivante }}
@@ -60,7 +61,7 @@
         <label for="{{ form.diagnosticoPresuntivo.id_for_label }}"
           >Diagnostico Presuntivo</label
         >
-        {{ form.diagnosticoPresuntivo }}
+        {{ form.patologia }}
       </div>
     </div>
   </div>

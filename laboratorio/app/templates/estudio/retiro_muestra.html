@@ -1,11 +1,11 @@
 {% extends 'base.html' %} {% block title %}
-<h1 class="m-3 text-center">Cargar muestra</h1>
+<h1 class="m-3 text-center">Retiro de muestra</h1>
 {% endblock %} 
 
 {% block content %}
 <a href="{% url 'Estudios' %}" class="">Volver</a>
 <div class="mt-5">
-<form action="{% url 'Cargar_Muestra' id=estudio.id%}" method="post">
+<form action="{% url 'Retiro_Muestra' id=estudio.id%}" method="post">
     {% csrf_token %}
     {{ form }}
     <input type="submit" class="btn btn-primary w-50 mt-2" value="Cargar Muestra">

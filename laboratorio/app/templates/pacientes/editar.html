@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %} <h1>Editar</h1> {% endblock %}
+{% block title %} <h1 class="m-3 text-center">Editar paciente</h1> {% endblock %}
 
 
 {% block content %}
-<form action="/pacientes/editar/{{paciente.id}}" method="post"> {% csrf_token %}
+<a href="{% url 'Pacientes' %}" class="mb-5">Volver</a>
+<form action="/pacientes/editar/{{paciente.id}}" class="mt-5" method="post"> {% csrf_token %}
     <input type="hidden" name="id" value="{{paciente.id}}">
     <div class="row">
         <div class="col-sm">
@@ -41,17 +42,18 @@
             <div class="form-group">
                 <label for="obraSocialPaciente">Obra Social</label>
                 <select class="form-control" id="obraSocialPaciente" name="obraSocial">
-                  {% for obra in obras %}
-                    {% if obra.id == paciente.obraSocial.id %}
-                    <option value="{{obra.id}}" selected>{{obra.nombre}}</option>
-                    {% else %}
-                    <option value="{{obra.id}}" selected>{{obra.nombre}}</option>
-                    {% endif %}
-                  {% endfor %}
+                    <option value="0" selected>--Seleccionar Obra Social--</option>
+                    {% for obra in obras %}
+                        {% if obra.id == paciente.obraSocial.id %}
+                        <option value="{{obra.id}}" selected>{{obra.nombre}}</option>
+                        {% else %}
+                        <option value="{{obra.id}}">{{obra.nombre}}</option>
+                        {% endif %}
+                    {% endfor %}
                 </select>
               </div>
         </div>
     </div>
-    <button type="submit" class="btn btn-primary">Actualizar</button>
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
 </form>
 {% endblock %}

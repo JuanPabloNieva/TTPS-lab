@@ -1,7 +1,7 @@
 {% extends 'base.html' %} {% block title %}
-<h1 class="m-3 text-center">Cargar consentimiento informado firmado</h1>
+<h1 class="m-3 text-center">Cargar consentimiento informado (firmado)</h1>
 {% endblock %} {% block content %}
-<a href="{% url 'Estudios' %}" class="">Volver</a>
+<a href="{% url 'Estudios' %}" class="mb-5">Volver</a>
 <div class="m-3">
 <form action="{% url 'Cargar_Consentimiento' id=estudio.id %}" method="POST" enctype="multipart/form-data">
   {% csrf_token %}

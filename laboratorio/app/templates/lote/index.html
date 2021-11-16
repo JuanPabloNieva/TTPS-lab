@@ -1,0 +1,52 @@
+{% extends 'base.html' %} {% block title %}
+<h1 class="m-3 text-center">Lotes de muestras</h1>
+{% endblock %} {% block content %}
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }} messages alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+    <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+    </li>
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+
+<table class="table table-striped" id="estudios">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Nro Lote</th>
+      <th scope="col">Estado</th>
+      <th scope="col">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for lote in lotes %}
+    <tr>
+      <td>
+        {{lote.id}}
+      </td>
+      <td>
+       {{lote.estado}}
+      </td>
+      <td>
+        {% if lote.estado == 'En procesamiento' %}
+        <a
+          href="{% url 'Finalizar_Proceso' id=lote.id %}"
+          class="btn btn-warning mb-2"
+          >Finalizar proceso</a
+        >
+        {% endif %}
+        <a
+          href="{% url 'Listar_Muestras' id=lote.id %}"
+          class="btn btn-warning mb-2"
+          >Ver Muestras</a
+        >
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
