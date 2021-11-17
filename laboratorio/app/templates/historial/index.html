@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %} <h1> Historial de: {{paciente.nombre}} {{paciente.apellido}}</h1> {% endblock %}
+{% block title %} <h1 class="m-3 text-center"> Historial de {{paciente.nombre}} {{paciente.apellido}}</h1> {% endblock %}
 
 
 {% block content %}
 
-<a href="/historial/nuevo/{{paciente.id}}" class="btn btn-info">AGREGAR HISTORIAL</a>
+<a href="/historial/nuevo/{{paciente.id}}" class="btn btn-success m-2">Agregar Historial</a>
 
 <div id="accordion">
 
@@ -19,13 +19,7 @@
                         Fecha: {{historia.fecha}}
                     </button>
                 </h5>
-            </div><!--
-            <div class="col-sm-2 edit-btn">
-                <button class="btn disable">editar</button>
             </div>
-            <div class="col-sm-2 remove-btn">
-                <button class="btn ">eliminar</button>
-            </div>-->
         </div>
 
         <div id="collapse{{historia.id}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">

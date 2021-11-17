@@ -1,64 +1,75 @@
-from django import template
-from django.conf.urls import url
-from django.forms.forms import Form
-from django.http import FileResponse
-from django.shortcuts import redirect, render, HttpResponseRedirect, HttpResponse
-from django.template import loader
-from django.urls.conf import path
-from .models import Muestra, Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial, Estado
-from django.template.loader import get_template
+from django.shortcuts import redirect, render, HttpResponse
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
-from reportlab.lib.enums import TA_CENTER
-
-
-from .models import Comprobante, Consentimiento, ConsentimientoFirmado, Lote, MedicoInformante, Muestra, Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial, Estado, Turno, Interpretacion, Patologia
-
+from .models import Comprobante, Consentimiento, ConsentimientoFirmado, Lote, MedicoInformante, Turno, Interpretacion, Patologia, Muestra, Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial, Estado
 from .forms import EstudioForm, InterpretacionForm, LoginForm, MuestraForm, PacienteForm, HistorialForm, ComprobanteForm, ConsentimientoForm, RMuestraForm, TurnoFechaForm, TurnoForm
-import random
-import os
 from laboratorio import settings
-from datetime import date, datetime
-from django.core.files.storage import Storage
-
-import io
-import pdfkit
-
+from datetime import datetime
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
-from datetime import date, datetime, timedelta
 
 from plotly.offline import plot
 import plotly.graph_objects as go
-#import plotly.express as px
+import io, random, os
 
-# Create your views here.
+def checkeos_session_permisos(request):
+    user = request.session.get('user_id')
 
+    if not user:
+        raise PermissionDenied
+
+    return None
 
 def home(request):
-    if request.method == 'POST':
+    form = LoginForm()
+    return redirect('/login', {'form': form})
+
+def login(request):
+    if request.POST:
         form = LoginForm(request.POST)
         if form.is_valid():
+            try:
+                empleado = Empleado.objects.get(usuario=request.POST['usuario'])
+                if empleado.password == request.POST['password']:
+                    request.session['user_id'] = empleado.id
+                    messages.success(request, '¡Bienvenido {0}!'.format(empleado.nombre))
+                else:
+                    messages.error(request, '¡Contraseña invalida!'.format(empleado.nombre))
+                    return render(request, 'login.html', {'form': form})
+            except:
+                messages.error(request, '¡Usuario invalido!')
+                return render(request, 'login.html', {'form': form})
             return redirect('/estudios')
     else:
         form = LoginForm()
-        return redirect('/login', {'form': form})
+        return render(request, 'login.html', {'form': form})
 
+def logout(request):
+    checkeos_session_permisos(request)
+    try:
+        del request.session['user_id']
+        request.session.flush()
+    except KeyError:
+        pass
+    messages.success(request, 'Sesión Finalizada')
+    return redirect('/')
 
 def estudios(request):
+    checkeos_session_permisos(request)
     estudios = Estudio.objects.all()
     return render(request, 'estudio/index.html', {'estudios': estudios})
 
 
 def nuevo_estudio(request):
+    checkeos_session_permisos(request)
     if request.method == 'POST':
         form = EstudioForm(request.POST)
         if form.is_valid():
             try:
                 estudio = Estudio()
                 estudio.presupuesto = request.POST['presupuesto']
-                # Deberia ser el empleado que esta en la session actualmente
-                estudio.empleadoCarga = Empleado.objects.filter(id=1).first()
+                estudio.empleadoCarga = Empleado.objects.filter(id=request.session['user_id']).first()
                 estudio.fechaAlta = datetime.today()
                 estudio.medicoDerivante = MedicoDerivante.objects.filter(
                     id=request.POST['medicoDerivante']).first()
@@ -80,6 +91,7 @@ def nuevo_estudio(request):
 
 
 def editar_estudio(request, id):
+    checkeos_session_permisos(request)
     if request.method == 'POST':
         try:
             estudio = Estudio.objects.filter(id=id).first()
@@ -108,6 +120,7 @@ def editar_estudio(request, id):
 
 
 def pacientes(request):
+    checkeos_session_permisos(request)
     if request.method == 'POST':
         form = PacienteForm(request.POST)
         if form.is_valid():
@@ -133,11 +146,13 @@ def pacientes(request):
 
 
 def nuevo_paciente(request):
+    checkeos_session_permisos(request)
     obras = ObraSocial.objects.all()
     return render(request, 'pacientes/create.html', {"obras": obras})
 
 
 def eliminar_paciente(request, id):
+    checkeos_session_permisos(request)
     try:
         paciente = Paciente.objects.get(id=id)
         paciente.delete()
@@ -149,6 +164,7 @@ def eliminar_paciente(request, id):
 
 
 def editar_paciente(request, id):
+    checkeos_session_permisos(request)
     if request.method == 'POST':
         form = PacienteForm(request.POST)
         if form.is_valid():
@@ -176,21 +192,18 @@ def editar_paciente(request, id):
 
 
 def empleados(request):
+    checkeos_session_permisos(request)
     return HttpResponse('Empleados')
 
 
 # def pendientes(request):
 #     return HttpResponse('Pendientes')
 
-
-def login(request):
-    form = LoginForm()
-    return render(request, 'login.html', {'form': form})
-
 # --------HISTORIAL----------
 
 
 def historial(request):
+    checkeos_session_permisos(request)
     if request.method == 'POST':
         print(request.POST)
         form = HistorialForm(request.POST)
@@ -213,11 +226,13 @@ def historial(request):
 
 
 def nuevo_historial(request, id):
+    checkeos_session_permisos(request)
     paciente = Paciente.objects.filter(id=id).first()
     return render(request, "historial/create.html", {"paciente": paciente})
 
 
 def historial_paciente(request, id):
+    checkeos_session_permisos(request)
     paciente = Paciente.objects.filter(id=id).first()
     historial = Historial.objects.filter(paciente_id=paciente.id)
     return render(request, 'historial/index.html', {"paciente": paciente, "historial": historial})
@@ -226,6 +241,7 @@ def historial_paciente(request, id):
 
 
 def pendientes(request):
+    checkeos_session_permisos(request)
     estudiosPendientes = []
     estudiosSinAbonar = Estudio.objects.filter(abonado=False)
 
@@ -236,13 +252,17 @@ def pendientes(request):
 
 
 def pagar_estudios(request):
+    checkeos_session_permisos(request)
     abonar = request.POST.getlist('estudios[]')
     try:
         for id in abonar:
             estudio = Estudio.objects.filter(id=id).first()
             estudio.abonado = True
             estudio.save()
-        messages.success(request, '¡Se pagaron los estudios con éxito!')
+        if abonar:
+            messages.success(request, '¡Se pagaron los estudios con éxito!')
+        else:
+            messages.warning(request, '¡Debe seleccionar al menos un checkbox!')
     except:
         messages.error(request, '¡No se pudo realizar el pagos!')
 
@@ -253,6 +273,7 @@ def pagar_estudios(request):
 
 
 def cargar_comprobante(request, id):
+    checkeos_session_permisos(request)
     estudio = Estudio.objects.filter(id=id).first()
     if request.method == 'POST':
         form = ComprobanteForm(request.POST, request.FILES)
@@ -277,6 +298,7 @@ def cargar_comprobante(request, id):
 
 
 def descargar_consentimiento(request, id):
+    checkeos_session_permisos(request)
     estudio = Estudio.objects.filter(id=id).first()
     consentimiento = Consentimiento.objects.filter(
         tipoEstudio=estudio.tipoEstudio).first()
@@ -292,6 +314,7 @@ def descargar_consentimiento(request, id):
 
 
 def cargar_consentimiento(request, id):
+    checkeos_session_permisos(request)
     estudio = Estudio.objects.filter(id=id).first()
     if request.method == 'POST':
         form = ConsentimientoForm(request.POST, request.FILES)
@@ -317,6 +340,7 @@ def cargar_consentimiento(request, id):
 
 
 def seleccionar_turno(request, id):
+    checkeos_session_permisos(request)
     estudio = Estudio.objects.filter(id=id).first()
     # HORARIOS IRIA EN SETTINGS PARA QUE SE REALICEN CAMBIOS EN UN UNICO LUGAR
     horarios = [('09:00:00', '09:00:00'), ('09:15:00', '09:15:00'), ('09:30:00', '09:30:00'), ('09:45:00', '09:45:00'), ('10:00:00', '10:00:00'), ('10:15:00', '10:15:00'), ('10:30:00', '10:30:00'),
@@ -349,6 +373,7 @@ def seleccionar_turno(request, id):
 
 
 def buscar_turno_por_fecha(request, id):
+    checkeos_session_permisos(request)
     horarios = [('09:00:00', '09:00:00'), ('09:15:00', '09:15:00'), ('09:30:00', '09:30:00'), ('09:45:00', '09:45:00'), ('10:00:00', '10:00:00'), ('10:15:00', '10:15:00'), ('10:30:00', '10:30:00'),
                 ('10:45:00', '10:45:00'), ('11:00:00', '11:00:00'), ('11:15:00', '11:15:00'), ('11:30:00', '11:30:00'), ('11:45:00', '11:45:00'), ('12:00:00', '12:00:00'), ('12:15:00', '12:15:00'), ('12:30:00', '12:30:00'), ('12:45:00', '12:45:00'), ('13:00:00', '13:00:00')]
 
@@ -375,6 +400,7 @@ def buscar_turno_por_fecha(request, id):
 
 
 def cargar_muestra(request, id):
+    checkeos_session_permisos(request)
     estudio = Estudio.objects.filter(id=id).first()
 
     if request.method == 'POST':
@@ -404,6 +430,7 @@ def cargar_muestra(request, id):
 
 
 def retiro_muestra(request, id):
+    checkeos_session_permisos(request)
     estudio = Estudio.objects.filter(id=id).first()
 
     if request.method == 'POST':
@@ -418,7 +445,10 @@ def retiro_muestra(request, id):
                 estudio.estado = Estado.objects.filter(detalle="7").first()
                 estudio.save()
                 total_muestras = Muestra.objects.exclude(personaRetira=None)
+                tota = total_muestras.count() 
+                tot = total_muestras.count() % 10 == 0
                 if total_muestras.count() % 10 == 0:
+                    # muestras = Muestra.objects.filter(lote=None).exclude(personaRetira=None)
                     crear_lote()
                     messages.success(request, '¡Se ha creado un lote con éxito!')
                 messages.success(request,'!Retiro de muestra cargado con éxito!')
@@ -438,10 +468,11 @@ def retiro_muestra(request, id):
 def crear_lote():
     lote = Lote()
     lote.save()
-    Muestra.objects.filter(lote=None).update(lote=lote)
+    Muestra.objects.filter(lote=None).exclude(personaRetira=None).update(lote=lote)
 
 
 def lotes(request):
+    checkeos_session_permisos(request)
     lotes = Lote.objects.all()
     return render(request, 'lote/index.html', {'lotes': lotes})
 
@@ -458,6 +489,7 @@ def finalizar_proceso(request, id):
 
 
 def listar_muestras(request, id):
+    checkeos_session_permisos(request)
     muestras = Muestra.objects.filter(lote=id)
 
     return render(request, 'lote/lista_muestras.html', {'muestras': muestras, 'id': id})
@@ -466,6 +498,7 @@ def listar_muestras(request, id):
 
 
 def cargar_interpretacion(request, id):
+    checkeos_session_permisos(request)
     estudio = Estudio.objects.filter(id=id).first()
 
     if request.method == 'POST':
@@ -495,7 +528,7 @@ def cargar_interpretacion(request, id):
 
 
 def descargar_estudio(request, id):
-
+    checkeos_session_permisos(request)
     interpretacion = Interpretacion.objects.filter(estudio=id).first()
     messages.success(
         request, '¡Descarga Exitosa!')
@@ -504,6 +537,8 @@ def descargar_estudio(request, id):
 
 
 def report(request, inter):
+    checkeos_session_permisos(request)
+    
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = "attachment; filename=Interpretacion_{0}_{1}.pdf".format(
         inter.estudio.id, inter.estudio.tipoEstudio)
@@ -548,8 +583,9 @@ def report(request, inter):
 
 
 def resultado_entregado(request, id):
+    checkeos_session_permisos(request)
     estudio = Estudio.objects.filter(id=id).first()
-
+    estudio.fechaFin = datetime.now()
     estudio.estado = Estado.objects.filter(detalle="10").first()
     estudio.save()
 
@@ -567,9 +603,11 @@ def resultado_entregado(request, id):
 
 #------Graficos---------
 def graficos(request):
+    checkeos_session_permisos(request)
     return render(request, "graficos/index.html")
 
 def cantXTipo(request):
+    checkeos_session_permisos(request)
     """ 
     View demonstrating how to display a graph object
     on a web page with Plotly. 
@@ -630,6 +668,7 @@ def cantXTipo(request):
     return render(request,"graficos/cantXTipo.html", {'plot_div': plot_div, 'tiposDeEstudios':tiposDeEstudios})
 
 def cantXMes(request):
+    checkeos_session_permisos(request)
     """ 
     View demonstrating how to display a graph object
     on a web page with Plotly. 
@@ -652,7 +691,7 @@ def cantXMes(request):
 
     # Setting layout of the figure.
     layout = {
-        'xaxis_title': 'Tipo de Estudio ',
+        'xaxis_title': 'Mes',
         'yaxis_title': 'Cantidad',
         'height': 640,
         'width': 900
@@ -664,28 +703,21 @@ def cantXMes(request):
     return render(request,"graficos/cantXMes.html", {'plot_div': plot_div})
 
 def boxplot(request):
-   
+    checkeos_session_permisos(request)
     y = []
-    estudios = Estudio.objects.all()
+    estudios = Estudio.objects.filter(estado='10')
     muestras = Muestra.objects.all()
-
+    
     filtro=[]
     for estudio in estudios:
-        for muestra in muestras:
-            if muestra.paciente.id == estudio.paciente.id:
-                filtro.append({"estudio":estudio, "muestra":muestra})
+        filtro.append({'estudio':estudio, 'muestra': Muestra.objects.filter(estudio=estudio).first()})
 
-    # Tenes que tomar la fecha fin del estudio y hacer lo 
-    # que hago con fecha de inicio. Y mete estas lineas
-    # dentro del for
-    fechaFin = datetime.now().strftime("%Y-%m-%d")
-    fin = datetime.strptime(fechaFin, '%Y-%m-%d')
     #-------------------------------------------------
     
     for elem in filtro:
         # ejemplo 
-        # fechaFin = elem['estudio'].fechaFin.strftime("%Y-%m-%d")
-        # fin = datetime.strptime(fechaFin, '%Y-%m-%d')
+        fechaFin = elem['estudio'].fechaFin.strftime("%Y-%m-%d")
+        fin = datetime.strptime(fechaFin, '%Y-%m-%d')
         fechaInicio = elem['muestra'].fecha.strftime("%Y-%m-%d")
         inicio =  datetime.strptime(fechaInicio, '%Y-%m-%d')
         
@@ -694,8 +726,9 @@ def boxplot(request):
     graphs = []
     
     graphs.append(
-        go.Box( y=y, name="Días") 
+        go.Box( y=y, name="Días")
     )
+
 
     # Setting layout of the figure.
     layout = {

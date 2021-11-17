@@ -47,7 +47,7 @@ class Empleado(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
     usuario = models.CharField(max_length=100)
-    contraseña = models.CharField(max_length=100)
+    password = models.CharField(max_length=100)
 
     def __str__(self):
         return u'{0} {1}'.format(self.nombre, self.apellido)
