@@ -4,9 +4,10 @@ from django.contrib import messages
 from .models import Comprobante, Consentimiento, ConsentimientoFirmado, Lote, MedicoInformante, Turno, Interpretacion, Patologia, Muestra, Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial, Estado
 from .forms import EstudioForm, InterpretacionForm, LoginForm, MuestraForm, PacienteForm, HistorialForm, ComprobanteForm, ConsentimientoForm, RMuestraForm, TurnoFechaForm, TurnoForm
 from laboratorio import settings
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
+from dateutil.relativedelta import relativedelta
 
 
 from plotly.offline import plot
@@ -33,6 +34,7 @@ def login(request):
                 empleado = Empleado.objects.get(usuario=request.POST['usuario'])
                 if empleado.password == request.POST['password']:
                     request.session['user_id'] = empleado.id
+                    actualizar_estudios_retrasados()
                     messages.success(request, '¡Bienvenido {0}!'.format(empleado.nombre))
                 else:
                     messages.error(request, '¡Contraseña invalida!'.format(empleado.nombre))
@@ -44,6 +46,18 @@ def login(request):
     else:
         form = LoginForm()
         return render(request, 'login.html', {'form': form})
+
+def actualizar_estudios_retrasados():
+    ahora = date.today()
+    tres_meses = (ahora -relativedelta(months=3))
+    tdias = (ahora - timedelta(days=30))
+    estudios = Estudio.objects.filter(fechaAlta__lte=tres_meses)
+    Estudio.objects.filter(estado="1").filter(fechaAlta__lte=tdias).update(estado="11")
+
+    for estudio in estudios:
+        estudio.retrasado = True
+        estudio.save()
+
 
 def logout(request):
     checkeos_session_permisos(request)
@@ -408,10 +422,15 @@ def cargar_muestra(request, id):
 
         if form.is_valid():
             try:
+                turno = Turno.objects.get(estudio=estudio)
+                #Si se quiere cargar la muestra antes del turno
+                if turno.fecha > date.today():
+                    messages.warning(request, 'El paciente tiene turno para la fecha %s'%turno.fecha)
+                    return redirect('/estudios')
                 muestra = Muestra()
                 muestra.numeroFreezer = request.POST['nroFreezer']
                 muestra.mlExtraidos = request.POST['mlExtraidos']
-                muestra.fecha = datetime.now()
+                muestra.fechaAlta = datetime.now()
                 muestra.estudio = estudio
                 muestra.save()
 
@@ -438,17 +457,26 @@ def retiro_muestra(request, id):
 
         if form.is_valid():
             try:
+                muestra = Muestra.objects.get(estudio=estudio)
+                ahora = date.today()
+                #Si pasaron 30 dias la muestra se vencio
+                if muestra.fechaAlta <= (ahora - timedelta(days=30)):
+                    messages.warning(request, '¡La muestra venció! El paciente debe sacar un nuevo turno para la extracción.')
+                    Turno.objects.filter(estudio=estudio).delete()
+                    muestra.delete()
+                    estudio.estado = Estado.objects.filter(detalle="4").first()
+                    estudio.save()
+                    return redirect('/estudios')
+                
                 personaRetiro = '{0} {1}'.format(
                     request.POST['nombre'], request.POST['apellido'])
                 Muestra.objects.filter(estudio=estudio).update(
-                    personaRetira=personaRetiro)
+                    personaRetira=personaRetiro, fechaRetiro=date.today())
+                
                 estudio.estado = Estado.objects.filter(detalle="7").first()
                 estudio.save()
                 total_muestras = Muestra.objects.exclude(personaRetira=None)
-                tota = total_muestras.count() 
-                tot = total_muestras.count() % 10 == 0
                 if total_muestras.count() % 10 == 0:
-                    # muestras = Muestra.objects.filter(lote=None).exclude(personaRetira=None)
                     crear_lote()
                     messages.success(request, '¡Se ha creado un lote con éxito!')
                 messages.success(request,'!Retiro de muestra cargado con éxito!')
@@ -718,7 +746,7 @@ def boxplot(request):
         # ejemplo 
         fechaFin = elem['estudio'].fechaFin.strftime("%Y-%m-%d")
         fin = datetime.strptime(fechaFin, '%Y-%m-%d')
-        fechaInicio = elem['muestra'].fecha.strftime("%Y-%m-%d")
+        fechaInicio = elem['muestra'].fechaAlta.strftime("%Y-%m-%d")
         inicio =  datetime.strptime(fechaInicio, '%Y-%m-%d')
         
         y.append((fin - inicio).days)

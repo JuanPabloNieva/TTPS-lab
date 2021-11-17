@@ -18,6 +18,7 @@ class Estudio(models.Model):
     presupuesto = models.DecimalField(decimal_places=2, max_digits=19)
     patologia = models.ForeignKey('Patologia', on_delete=models.RESTRICT)
     fechaFin = models.DateField(null=True)
+    retrasado = models.BooleanField(default=False)
 
 
 class TipoEstudio(models.Model):
@@ -76,7 +77,8 @@ class Muestra(models.Model):
     id = models.AutoField(primary_key=True)
     lote = models.ForeignKey('Lote', on_delete=models.RESTRICT, null=True)
     estudio = models.ForeignKey('Estudio', on_delete=models.RESTRICT)
-    fecha = models.DateField()
+    fechaAlta = models.DateField()
+    fechaRetiro = models.DateField(null=True)
     numeroFreezer = models.BigIntegerField()
     mlExtraidos = models.DecimalField(decimal_places=1, max_digits=3)
     personaRetira = models.CharField(max_length=100, null=True)
