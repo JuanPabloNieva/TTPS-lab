@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+    rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous"
+    />
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"
+    ></script>
+    <title>Login</title>
+</head>
+<body>
+    {% if messages %}
+    <div class="m-4">
+    <ul >
+        {% for message in messages %}
+
+        {% if message.tags == 'error'  %}
+        <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+            <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+            </li>
+        {% else %}
+        <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    </div>
+    {% endif %}
+    <div class=" container mt-5 d-flex justify-content-center">
+        <div class="p-5 bg-dark rounded">
+            <div class="m-5">
+                <h1 class="text-white">Iniciar Sesión</h1>
+            </div>
+            <form action="{% url 'Login' %}" method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="text-white" for="{{ form.usuario.id_for_label }}">Nombre de usuario</label>
+                    {{ form.usuario }}
+                </div>
+                <div class="mb-3">
+                    <label class="text-white" for="{{ form.password.id_for_label }}" class="">Contraseña</label>
+                    {{ form.password }}
+                </div>
+                <input type="submit" value="Iniciar Sesión" class="btn btn-primary w-100">
+            </form>
+        </div>
+    </div>
+</body>
+</html>

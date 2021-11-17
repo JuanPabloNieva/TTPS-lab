@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %} <h1 class="m-3 text-center">Pacientes</h1> {% endblock %}
+
+
+{% block content %}
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+
+      {% if message.tags == 'error' %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<a href="{% url 'Registrar Paciente' %}" class="btn btn-success mb-3">Crear Paciente</a>
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Nombre</th>
+      <th scope="col">Apellido</th>
+      <th scope="col">DNI</th>
+      <th scope="col">Telefono</th>
+      <th scope="col">Nro Afiliado</th>
+      <th scope="col">Obra Social</th>
+      <th scope="col">Historia Clinica</th>
+      <th scope="col">Editar</th>
+      <th scope="col">Borrar</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for paciente in pacientes %}
+    <tr>
+      <td>{{paciente.nombre}}</td>
+      <td>{{paciente.apellido}}</td>
+      <td>{{paciente.dni}}</td>
+      <td>{{paciente.telefono}}</td>
+      <td>{{paciente.numeroAfiliado}}</td>
+      <td>{{paciente.obraSocial.nombre}}</td>
+      <td>
+        <a href="historial/paciente/{{paciente.id}}">Ver</a>
+      </td>
+      <td><a href="pacientes/editar/{{paciente.id}}" class="btn btn-info">Editar</a></td>
+      <td><a href="pacientes/eliminar/{{paciente.id}}" class="btn btn-danger">Eliminar</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

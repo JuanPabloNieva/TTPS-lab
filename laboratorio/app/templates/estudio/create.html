@@ -1,0 +1,94 @@
+{% extends 'base.html' %} {% block title %}
+<h1 class="m-3 text-center">Crear estudio</h1>
+{% endblock %} {% block content %}
+<a href="{% url 'Estudios' %}" class="mb-5">Volver</a>
+<form action="{% url 'Crear_Estudio' %}" class="mt-5" method="POST">
+  {% csrf_token %}
+  <div class="row">
+    <div class="col-sm">
+      <div class="form-group">
+        <label for="{{ form.presupuesto.id_for_label }}">Presupuesto</label>
+        {{ form.presupuesto }}
+      </div>
+    </div>
+    <div class="col-sm">
+      <div class="form-group">
+        <label for="{{ form.paciente.id_for_label }}">Paciente</label>
+        <div class="row g-3 align-items-center mb-2">
+          <div class="col-auto w-50">
+            <input
+              class="form-control"
+              type="text"
+              id="filtroInput"
+              onkeyup="myFunction()"
+              placeholder="Nombre o DNI de paciente"
+              title="Escribe un nombre o dni de paciente"
+            />
+          </div>
+          <div class="col-auto">
+            <a
+              href="{% url 'Registrar Paciente' %}"
+              class="btn btn-sm btn-success"
+              >Paciente Nuevo</a
+            >
+          </div>
+        </div>
+        {{ form.paciente }}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm">
+      <div class="form-group">
+        <label for="{{ form.patologia.id_for_label }}"
+          >Médico Derivante</label
+        >
+        {{ form.medicoDerivante }}
+      </div>
+    </div>
+    <div class="col-sm">
+      <div class="form-group">
+        <label for="{{ form.tipoEstudio.id_for_label }}" id="prueba"
+          >Tipo de Estudio</label
+        >
+        {{ form.tipoEstudio }}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm">
+      <div class="form-group">
+        <label for="{{ form.diagnosticoPresuntivo.id_for_label }}"
+          >Diagnostico Presuntivo</label
+        >
+        {{ form.patologia }}
+      </div>
+    </div>
+  </div>
+  <input type="submit" class="btn btn-primary" value="Cargar estudio" />
+</form>
+<script>
+  function myFunction() {
+    let input, filter, table, opt, td, i, txtValue;
+    input = document.getElementById("filtroInput");
+    filter = input.value.toUpperCase();
+    elementos = document.getElementById("pacientes");
+    opt = elementos.getElementsByTagName("option");
+    for (i = 1; i < opt.length; i++) {
+      td = opt[i];
+      if (td) {
+        txtValue = td.textContent || td.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          opt[i].selected = "selected";
+          opt[i].style.display = "";
+        } else {
+          opt[i].style.display = "none";
+        }
+        if (filter == "") {
+          opt[0].selected = "selected";
+        }
+      }
+    }
+  }
+</script>
+{% endblock %}

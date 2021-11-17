@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %} <h1 class="text-center mt-3"> Cantidad de Estudios por Tipo</h1> {% endblock %}
+
+
+{% block content %}
+
+<div class="row">
+    <div class="col-6">
+        {% autoescape off %}
+        {{ plot_div }}
+        {% endautoescape %}
+    </div>
+    <div class="col-6 pt-4">
+        <ul class="list-group">
+            {% for tipo in tiposDeEstudios %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{tipo.nombre}}
+                <span class="badge badge-primary badge-pill">{{tipo.id}}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

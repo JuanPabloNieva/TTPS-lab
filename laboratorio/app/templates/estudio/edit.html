@@ -1,0 +1,45 @@
+{% extends 'base.html' %} {% block title %}
+<h1 class="m-3 text-center">Editar estudio</h1>
+{% endblock %} {% block content %}
+<a href="{% url 'Estudios' %}" class="mb-5">Volver</a>
+<form action="{% url 'Editar_Estudio' id=id %}" class="mt-5" method="POST">
+  {% csrf_token %}
+  <div class="row">
+    <div class="col-sm">
+      <div class="form-group">
+        <label for="{{ form.presupuesto.id_for_label }}">Presupuesto</label>
+        {{ form.presupuesto }}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm">
+      <div class="form-group">
+        <label for="{{ form.medicoDerivante.id_for_label }}"
+          >Médico Derivante</label
+        >
+        {{ form.medicoDerivante }}
+      </div>
+    </div>
+    <div class="col-sm">
+      <div class="form-group">
+        <label for="{{ form.tipoEstudio.id_for_label }}" id="prueba"
+          >Tipo de Estudio</label
+        >
+        {{ form.tipoEstudio }}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm">
+      <div class="form-group">
+        <label for="{{ form.patologia.id_for_label }}"
+          >Diagnostico Presuntivo</label
+        >
+        {{ form.patologia }}
+      </div>
+    </div>
+  </div>
+  <input type="submit" class="btn btn-primary" value="Guardar Cambios" />
+</form>
+{% endblock %}
