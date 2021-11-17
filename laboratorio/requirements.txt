@@ -1,8 +1,10 @@
 arabic-reshaper==2.1.3
 asgiref==3.4.1
 Django==3.2.8
+django-crontab==0.7.1
 django-xhtml2pdf==0.0.4
 future==0.18.2
+gunicorn==20.1.0
 html5lib==1.1
 pdfkit==1.0.0
 Pillow==8.4.0
