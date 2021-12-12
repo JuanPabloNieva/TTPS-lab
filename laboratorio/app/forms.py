@@ -1,12 +1,19 @@
 import datetime
 from django import forms
 from django.forms.widgets import DateInput, FileInput, Select
-from app.models import Paciente, MedicoDerivante, TipoEstudio, MedicoInformante, Patologia
+from app.models import Paciente, MedicoDerivante, TipoEstudio, MedicoInformante, Patologia,ObraSocial
 from datetime import date
+
 
 
 class LoginForm(forms.Form):
     usuario = forms.CharField(label='Nombre de usuario', widget=forms.TextInput(
+        attrs={'class': 'form-control'}), required=True)
+    password = forms.CharField(
+        label='Contraseña', required=True, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+class LoginFormPacientes(forms.Form):
+    dni = forms.IntegerField(label='DNI', widget=forms.NumberInput(
         attrs={'class': 'form-control'}), required=True)
     password = forms.CharField(
         label='Contraseña', required=True, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
@@ -24,15 +31,27 @@ class EstudioForm(forms.Form):
     tipoEstudio = forms.ModelChoiceField(queryset=TipoEstudio.objects.all(), label='Tipo de Estudio', widget=forms.Select(
         attrs={'class': 'form-control'}), empty_label='--Seleccionar--', to_field_name='id', required=True)
 
-
+class DateInput(forms.DateInput):
+    input_type = 'date'
 class PacienteForm(forms.Form):
-    nombre = forms.CharField(label='Nombre', required=True)
-    apellido = forms.CharField(label='Apelldio', required=True)
-    dni = forms.IntegerField(
-        label='DNI', help_text='Ingrese DNI sin puntos', required=True)
-    telefono = forms.CharField(label='Telefono', required=True)
-    obraSocial = forms.IntegerField(label='Obra Social')
-
+    nombre = forms.CharField(label='Nombre', widget=forms.TextInput(
+        attrs={'class': 'form-control'}), required=True)
+    apellido = forms.CharField(label='Apellido', widget=forms.TextInput(
+        attrs={'class': 'form-control'}), required=True)
+    dni = forms.IntegerField(label='DNI', help_text='Ingrese DNI sin puntos', widget=forms.NumberInput(
+        attrs={'class': 'form-control'}), required=True)
+    telefono = forms.IntegerField(label='Telefono', widget=forms.NumberInput(
+        attrs={'class': 'form-control'}), required=True)
+    obraSocial = forms.ModelChoiceField(queryset=ObraSocial.objects.all(), widget=forms.Select(
+        attrs={'class': 'form-control', 'id': 'obraSocial'}), label='Obra Social', to_field_name='id', empty_label='--Seleccionar--')
+    email = forms.CharField(label='Email', widget=forms.EmailInput(
+        attrs={'class': 'form-control'}), required=True)
+    nombreTutor = forms.CharField(label='Nombre Tutor', widget=forms.TextInput(
+        attrs={'class': 'form-control'}))
+    apellidoTutor = forms.CharField(label='Apellido Tutor', widget=forms.TextInput(
+        attrs={'class': 'form-control'}))
+    fechaNacimiento =  forms.DateField(label='Fecha de Nacimiento', widget=DateInput(
+        attrs={'class': 'form-control w-50', 'onchange':'checkEdad(event)'}), required=True)
 
 class HistorialForm(forms.Form):
     paciente = forms.IntegerField(label='Paciente', required=True)
@@ -50,8 +69,7 @@ class ConsentimientoForm(forms.Form):
         attrs={'accept': 'application/pdf'}))
 
 
-class DateInput(forms.DateInput):
-    input_type = 'date'
+
 
 
 class TimeInput(forms.TimeInput):

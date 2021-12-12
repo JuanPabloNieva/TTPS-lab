@@ -34,10 +34,15 @@ class Paciente(models.Model):
     obraSocial = models.ForeignKey('ObraSocial', on_delete=models.RESTRICT, null=True)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
+    nombreTutor = models.CharField(max_length=100, null=True)
+    apellidoTutor = models.CharField(max_length=100, null=True)
     dni = models.BigIntegerField()
     telefono = models.BigIntegerField()
-    resumenHClinica = models.TextField(max_length=100)
+    email = models.TextField(max_length=100)
     numeroAfiliado = models.BigIntegerField()
+    fechaNacimiento =  models.DateField()
+    password = models.CharField(max_length=100)
+    new = models.BooleanField(default=True)
 
     def __str__(self):
         return u'{0} {1} ({2})'.format(self.nombre, self.apellido, self.dni)
