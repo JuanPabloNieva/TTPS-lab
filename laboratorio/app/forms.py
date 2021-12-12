@@ -33,6 +33,7 @@ class EstudioForm(forms.Form):
 
 class DateInput(forms.DateInput):
     input_type = 'date'
+
 class PacienteForm(forms.Form):
     nombre = forms.CharField(label='Nombre', widget=forms.TextInput(
         attrs={'class': 'form-control'}), required=True)
@@ -47,11 +48,13 @@ class PacienteForm(forms.Form):
     email = forms.CharField(label='Email', widget=forms.EmailInput(
         attrs={'class': 'form-control'}), required=True)
     nombreTutor = forms.CharField(label='Nombre Tutor', widget=forms.TextInput(
-        attrs={'class': 'form-control'}))
+        attrs={'class': 'form-control'}), empty_value='')
     apellidoTutor = forms.CharField(label='Apellido Tutor', widget=forms.TextInput(
-        attrs={'class': 'form-control'}))
+        attrs={'class': 'form-control'}), empty_value='')
     fechaNacimiento =  forms.DateField(label='Fecha de Nacimiento', widget=DateInput(
         attrs={'class': 'form-control w-50', 'onchange':'checkEdad(event)'}), required=True)
+    password = forms.CharField(
+        label='Contraseña', required=True, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
 class HistorialForm(forms.Form):
     paciente = forms.IntegerField(label='Paciente', required=True)

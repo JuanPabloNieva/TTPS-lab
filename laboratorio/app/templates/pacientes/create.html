@@ -1,119 +1,163 @@
-{% extends 'base.html' %} {% block title %}
-<h1 class="m-3 text-center">Crear paciente</h1>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+    rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous"
+    />
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"
+    ></script>
+    <title>Login</title>
+</head>
+<body>
+    {% if messages %}
+    <div class="m-4">
+    <ul >
+        {% for message in messages %}
 
-{% block content %}
-<a href="{% url 'Pacientes' %}" class="mb-5">Volver</a>
-<form action="{% url 'Pacientes' %}" class="mt-5" method="post">
-  {% csrf_token %}
-  <div class="row">
-    <div class="col-sm">
-      <div class="form-group">
-        <label for="{{ form.nombre.id_for_label }}">Nombre</label>
-        {{form.nombre}}
-      </div>
+        {% if message.tags == 'error'  %}
+        <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+            <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+            </li>
+        {% else %}
+        <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
     </div>
-    <div class="col-sm">
-      <div class="form-group">
-        <label for="{{ form.apellido.id_for_label }}">Apellido</label>
-        {{form.apellido}}
-      </div>
+    {% endif %}
+    <div class=" container mt-5 d-flex justify-content-center">
+        <div class="p-5 bg-dark rounded">
+            <div class="m-5">
+                <h1 class="text-white">Registro Paciente</h1>
+            </div>
+            <form action="{% url 'Pacientes' %}" class="mt-5" method="post">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-sm">
+                  <div class="form-group">
+                    <label class="text-white" for="{{ form.nombre.id_for_label }}">Nombre</label>
+                    {{form.nombre}}
+                  </div>
+                </div>
+                <div class="col-sm">
+                  <div class="form-group">
+                    <label class="text-white" for="{{ form.apellido.id_for_label }}">Apellido</label>
+                    {{form.apellido}}
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm">
+                  <label class="text-white" for="{{ form.dni.id_for_label }}">DNI</label>
+                  {{form.dni}}
+                  <small id="dniHelp" class="form-text text-muted">Ingrese su DNI sin puntos</small>
+                </div>
+                <div class="col-sm">
+                  <div class="form-group">
+                    <label class="text-white" for="{{form.fechaNacimiento.id_for_label}}">Fecha de Nacimiento</label>
+                    {{form.fechaNacimiento}}
+                  </div>
+                </div>
+              </div>
+              <div class="row" id="tutor">
+            
+              </div>
+              <div class="row">
+                <div class="col-sm">
+                  <div class="form-group">
+                    <label class="text-white" for="obraSocialPaciente">Obra Social</label>
+                    <select class="form-control" id="obraSocialPaciente" name="obraSocial">
+                      <option value="0">--Seleccionar Obra Social--</option>
+                      {% for obra in obras %}
+                      <option value="{{obra.id}}">{{obra.nombre}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm">
+                  <div class="form-group">
+                    <label class="text-white" for="{{ form.nombre.id_for_label }}">Email</label>
+                    {{form.email}}
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                
+                <div class="col-sm">
+                  <div class="form-group">
+                  <label class="text-white" for="{{ form.telefono.id_for_label }}">Telefono</label>
+                  {{form.telefono}}
+                  <small id="telefonoHelp" class="form-text text-muted">Ingrese su telefono sin "-"</small>
+                  <label class="text-white" for="{{ form.password.id_for_label }}">Contraseña</label>
+                  {{form.password}}
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">Registrar paciente</button>
+            </form>
+        </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-sm">
-      <label for="{{ form.dni.id_for_label }}">DNI</label>
-      {{form.dni}}
-      <small id="dniHelp" class="form-text text-muted">Ingrese su DNI sin puntos</small>
-    </div>
-    <div class="col-sm">
-      <div class="form-group">
-        <label for="{{form.fechaNacimiento.id_for_label}}">Fecha de Nacimiento</label>
-        {{form.fechaNacimiento}}
-      </div>
-    </div>
-  </div>
-  <div class="row" id="tutor">
+    <p id="result"></p>
+    <script>
+      function checkEdad(event) {
+        console.log(event.target.value)
+        var value = event.target.value;
+        var inDate = new Date(value);
+        var anio = inDate.getFullYear();
+        var fec_actual = new Date();
+        var fec_anio = fec_actual.getFullYear();
+        var edad = fec_anio - anio;
+        if (edad >= 18) {
+          document.getElementById("tutor").innerHTML = "";
+        } else {
+          //Agregar campos para tutor
+          mainDiv = document.getElementById("tutor");
+          mainDiv.innerHTML=""
 
-  </div>
-  <div class="row">
-    <div class="col-sm">
-      <div class="form-group">
-        <label for="obraSocialPaciente">Obra Social</label>
-        <select class="form-control" id="obraSocialPaciente" name="obraSocial">
-          <option value="0">--Seleccionar Obra Social--</option>
-          {% for obra in obras %}
-          <option value="{{obra.id}}">{{obra.nombre}}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-    <div class="col-sm">
-      <div class="form-group">
-        <label for="{{ form.nombre.id_for_label }}">Email</label>
-        {{form.email}}
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    
-    <div class="col-sm">
-      <label for="{{ form.telefono.id_for_label }}">Telefono</label>
-      {{form.telefono}}
-      <small id="telefonoHelp" class="form-text text-muted">Ingrese su telefono sin "-"</small>
-    </div>
-  </div>
-  <button type="submit" class="btn btn-primary">Cargar paciente</button>
-</form>
-<p id="result"></p>
-<script>
-  function checkEdad(event) {
-    console.log(event.target.value)
-    var value = event.target.value;
-    var inDate = new Date(value);
-    var anio = inDate.getFullYear();
-    var fec_actual = new Date();
-    var fec_anio = fec_actual.getFullYear();
-    var edad = fec_anio - anio;
-    if (edad >= 18) {
-      document.getElementById("tutor").innerHTML = "";
-    } else {
-      //Agregar campos para tutor
-      mainDiv = document.getElementById("tutor");
-      mainDiv.innerHTML=""
+          divCol1 =  document.createElement("div");
+          divCol2 =  document.createElement("div");
 
-      divCol1 =  document.createElement("div");
-      divCol2 =  document.createElement("div");
+          divCol1.classList.add("col-sm")
+          divCol2.classList.add("col-sm")
 
-      divCol1.classList.add("col-sm")
-      divCol2.classList.add("col-sm")
+          label1 = document.createElement("label")
+          label1.setAttribute('for', '{{ form.nombreTutor.id_for_label }}' )
+          text1 = document.createTextNode("Nombre Tutor")
+          label1.appendChild(text1)
+          
+          label2 = document.createElement("label")
+          label2.setAttribute('for', '{{ form.apellidoTutor.id_for_label }}' )
+          text2 = document.createTextNode("Apellido Tutor")
+          label2.appendChild(text2)
+          
+          divCol1.innerHTML = '{{form.nombreTutor}}'
+          divCol1.appendChild(label1)
+          divCol2.innerHTML = '{{form.apellidoTutor}}'
+          divCol2.appendChild(label2)
+          
+          mainDiv.appendChild(divCol1)
+          mainDiv.appendChild(divCol2)
+        
+        }
+      }
+    </script>
 
-      label1 = document.createElement("label")
-      label1.setAttribute('for', '{{ form.nombreTutor.id_for_label }}' )
-      text1 = document.createTextNode("Nombre Tutor")
-      label1.appendChild(text1)
-      
-      label2 = document.createElement("label")
-      label2.setAttribute('for', '{{ form.apellidoTutor.id_for_label }}' )
-      text2 = document.createTextNode("Apellido Tutor")
-      label2.appendChild(text2)
-      
-      divCol1.innerHTML = '{{form.nombreTutor}}'
-      divCol1.appendChild(label1)
-      divCol2.innerHTML = '{{form.apellidoTutor}}'
-      divCol2.appendChild(label2)
-      
-      mainDiv.appendChild(divCol1)
-      mainDiv.appendChild(divCol2)
-    
-    }
-  }
-</script>
-{% endblock %}
-
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-  integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-  integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-  integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

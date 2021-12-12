@@ -35,13 +35,13 @@
         {% endfor %}
     </ul>
     </div>
-    {% endif %}
+    {% endif %}  
     <div class=" container mt-5 d-flex justify-content-center">
         <div class="p-5 bg-dark rounded">
             <div class="m-5">
-                <h1 class="text-white">Iniciar Sesión</h1>
+                <h1 class="text-white">Login Paciente</h1>
             </div>
-            <form action="{% url 'Login' %}" method="post">
+            <form action="{% url 'Login_Paciente' %}" method="post">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label class="text-white" for="{{ form.usuario.id_for_label }}">DNI</label>
@@ -55,14 +55,13 @@
             </form> 
             <div class="row border-top mt-2">
                 <div class="col-12">
-                    <a href="{% url 'Registrar Paciente'%}" class="btn btn-primary w-100 my-2">Regístrate</a>
-                </div>
-                <div class="col-12">
-                    <a  href="{% url 'Login Empleado' %}" class="btn btn-primary w-100 my-2">Ingresar Como Empleado</a>
+                    <a href="{% url 'Registrar Paciente'%}" class="btn btn-success w-100 mt-2">Regístrate</a>
                 </div>
             </div>
-        </div>
-       
+            <div class="mt-5">
+                <a  href="{% url 'Login Empleado' %}" class="btn btn-warning w-100">Ingresar como Empleado</a>
+            </div> 
+        </div>    
     </div>
 </body>
 </html>

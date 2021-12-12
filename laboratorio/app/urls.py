@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     path('', views.home, name='Home'),
     path('estudios', views.estudios, name='Estudios'),
+    path('estudios_paciente', views.estudios_paciente, name='Estudios_Paciente'),
     path('estudios/nuevo', views.nuevo_estudio, name='Crear_Estudio'),
     path('estudios/editar/<id>', views.editar_estudio, name='Editar_Estudio'),
     path('estudios/pendientes', views.pendientes, name='Pendientes'),
@@ -34,7 +35,7 @@ urlpatterns = [
     path('historial/paciente/<id>', views.historial_paciente),
     path('empleados', views.empleados, name='Empleados'),
     path('pendientes', views.pendientes, name='Pendientes'),
-    path('login', views.loginPaciente, name='Login'),
+    path('login', views.login_paciente, name='Login_Paciente'),
     path('empleado/login', views.login, name='Login Empleado'),
     path('logout', views.logout, name='Logout'),
     path('graficos', views.graficos, name="Graficos"),

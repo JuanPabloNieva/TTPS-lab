@@ -1,0 +1,130 @@
+{% extends 'basePacientes.html' %}{% block title %}
+<h1 class="m-3 text-center">Estudios</h1>
+{% endblock %} {% block content %}
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+
+      {% if message.tags == 'error'  %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<div class="row ml-1">
+  <div class="col-auto w-25">
+    <input
+      class="form-control"
+      type="text"
+      id="filtroInputIndex"
+      onkeyup="filtro()"
+      placeholder="Buscar por texto"
+    />
+  </div>
+</div>
+<table class="table table-striped" id="estudios">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Paciente</th>
+      <th scope="col">Médico Derivante</th>
+      <th scope="col">Tipo Estudio</th>
+      <th scope="col">Estado</th>
+      <th scope="col">Abonado</th>
+      <th scope="col">Retrasado</th>
+      <th scope="col">Fecha Alta</th>
+      <th scope="col">Presupuesto</th>
+      <th scope="col">Diagnostico Presuntivo</th>
+      <th scope="col">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for estudio in estudios %}
+    <tr>
+      <td id="paciente">
+        {{estudio.paciente.nombre}} {{estudio.paciente.apellido}}
+      </td>
+      <td>
+        {{estudio.medicoDerivante.nombre}} {{estudio.medicoDerivante.apellido}}
+      </td>
+      <td>{{estudio.tipoEstudio}}</td>
+      <td>{{estudio.estado.nombre}}</td>
+      {% if estudio.abonado %}
+      <td>SI</td>
+      {% else %}
+      <td>NO</td>
+      {% endif %}
+      {% if estudio.retrasado %}
+      <td>SI</td>
+      {% else %}
+      <td>NO</td>
+      {% endif %}
+      <td>{{estudio.fechaAlta}}</td>
+      <td>{{estudio.presupuesto}}</td>
+      <td>{{estudio.patologia}}</td>
+      <td>
+        {% if estudio.estado.detalle == "1"%}
+          {% if not conf.modoPacienteObligado %}
+        <a
+          href="{% url 'Cargar_Comprobante' id=estudio.id %}"
+          class="btn btn-warning mb-2"
+          >Cargar comprobante</a
+        >
+          {% endif %}
+        {% elif estudio.estado.detalle == "2" %}
+        <a
+          href="{% url 'Descargar_Consentimiento' id=estudio.id %}"
+          class="btn btn-warning mb-2"
+          onclick="recargar()"
+          >Descargar consentimiento</a
+        >
+        {% elif estudio.estado.detalle == "3"%}
+          {% if not conf.modoPacienteObligado %}
+        <a href="{% url 'Cargar_Consentimiento' id=estudio.id %}" class="btn btn-warning mb-2">Cargar consentimiento</a>
+          {% endif %}
+        {% elif estudio.estado.detalle == "4"%}
+          {% if not conf.modoPacienteObligado %}
+        <a href="{% url 'Buscar_Turno' id=estudio.id %}" class="btn btn-warning mb-2">Seleccionar turno</a>
+          {% endif %}
+        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-dark mb-2">Descargar estudio</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  function recargar() {
+    setTimeout(function () {
+      location.reload();
+    }, 400);
+  }
+  function filtro() {
+    let input, filter, table, opt, td, i, txtValue;
+    input = document.getElementById("filtroInputIndex");
+    filter = input.value.toUpperCase();
+    elementos = document.getElementById("estudios");
+    tr = elementos.getElementsByTagName("tr");
+    for (i = 1; i < tr.length; i++) {
+      td = tr[i];
+      console.log(td);
+      if (td) {
+        txtValue = td.textContent || td.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          tr[i].style.display = "";
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+  }
+</script>
+{% endblock %}
