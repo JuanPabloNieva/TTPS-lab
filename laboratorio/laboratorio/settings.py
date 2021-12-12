@@ -21,15 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 import os
 
-import django_heroku
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['grupo10-ttps.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
@@ -133,6 +132,3 @@ STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Activate Django-Heroku.
-django_heroku.settings(locals())

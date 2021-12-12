@@ -73,12 +73,14 @@
       <td>{{estudio.presupuesto}}</td>
       <td>{{estudio.patologia}}</td>
       <td>
-        {% if estudio.estado.detalle == "1" %}
+        {% if estudio.estado.detalle == "1"%}
+          {% if not conf.modoPacienteObligado %}
         <a
           href="{% url 'Cargar_Comprobante' id=estudio.id %}"
           class="btn btn-warning mb-2"
           >Cargar comprobante</a
         >
+          {% endif %}
         <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
           >Editar</a
         >
@@ -92,13 +94,17 @@
         <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
           >Editar</a
         >
-        {% elif estudio.estado.detalle == "3" %}
+        {% elif estudio.estado.detalle == "3"%}
+          {% if not conf.modoPacienteObligado %}
         <a href="{% url 'Cargar_Consentimiento' id=estudio.id %}" class="btn btn-warning mb-2">Cargar consentimiento</a>
+          {% endif %}
         <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
           >Editar</a
         >
-        {% elif estudio.estado.detalle == "4" %}
+        {% elif estudio.estado.detalle == "4"%}
+          {% if not conf.modoPacienteObligado %}
         <a href="{% url 'Buscar_Turno' id=estudio.id %}" class="btn btn-warning mb-2">Seleccionar turno</a>
+          {% endif %}
         <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
           >Editar</a
         >

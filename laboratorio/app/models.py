@@ -172,3 +172,7 @@ class Patologia(models.Model):
 
     def __str__(self):
         return '{0}'.format(self.nombre)
+
+class Configuracion(models.Model):
+    modoPacienteObligado = models.BooleanField(default=False)
+    

@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render, HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
-from .models import Comprobante, Consentimiento, ConsentimientoFirmado, Lote, MedicoInformante, Turno, Interpretacion, Patologia, Muestra, Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial, Estado
+from .models import Comprobante, Consentimiento, ConsentimientoFirmado, Lote, MedicoInformante, Turno, Interpretacion, Patologia, Muestra, Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial, Estado, Configuracion
 from .forms import EstudioForm, InterpretacionForm, LoginForm, MuestraForm, PacienteForm, HistorialForm, ComprobanteForm, ConsentimientoForm, RMuestraForm, TurnoFechaForm, TurnoForm
 from laboratorio import settings
 from datetime import date, datetime, timedelta
@@ -72,7 +72,8 @@ def logout(request):
 def estudios(request):
     checkeos_session_permisos(request)
     estudios = Estudio.objects.all()
-    return render(request, 'estudio/index.html', {'estudios': estudios})
+    conf = Configuracion.objects.all().first()
+    return render(request, 'estudio/index.html', {'estudios': estudios, 'conf': conf})
 
 
 def nuevo_estudio(request):
@@ -317,14 +318,21 @@ def descargar_consentimiento(request, id):
     consentimiento = Consentimiento.objects.filter(
         tipoEstudio=estudio.tipoEstudio).first()
     file_path = os.path.join(settings.MEDIA_ROOT, consentimiento.archivo.name)
-    if os.path.exists(file_path):
-        with open(file_path, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type="application/pdf")
-            response['Content-Disposition'] = 'attachment; filename=' + \
-                os.path.basename(file_path)
-            estudio.estado = Estado.objects.filter(detalle="3").first()
-            estudio.save()
-        return response
+    # if os.path.exists(file_path):
+    #     with open(file_path, 'rb') as fh:
+    #         response = HttpResponse(fh.read(), content_type="application/pdf")
+    #         response['Content-Disposition'] = 'attachment; filename={0}'.format(\
+    #             os.path.basename(file_path))
+    #         estudio.estado = Estado.objects.filter(detalle="3").first()
+    #         estudio.save()
+    #     return response
+    with open(file_path, 'rb') as fh:
+        response = HttpResponse(fh.read(), content_type="application/pdf")
+        response['Content-Disposition'] = 'attachment; filename={0}'.format(\
+            os.path.basename(file_path))
+        estudio.estado = Estado.objects.filter(detalle="3").first()
+        estudio.save()
+    return response
 
 
 def cargar_consentimiento(request, id):
@@ -379,6 +387,7 @@ def seleccionar_turno(request, id):
 
             return redirect('/estudios')
         else:
+            messages.error(request, '¡Los datos ingresados no son válidos!')
             return render(request, 'estudio/turno.html', {"form": form, "estudio": estudio})
     else:
         form = TurnoForm()
@@ -396,10 +405,8 @@ def buscar_turno_por_fecha(request, id):
         formF = TurnoFechaForm(request.POST)
         if formF.is_valid():
             turnos_fecha = Turno.objects.filter(fecha=request.POST['fecha'])
-
             for turno in turnos_fecha:
                 horarios.remove((str(turno.hora), str(turno.hora)))
-
             form = TurnoForm(horarios)
             form.fields['fecha'].initial = request.POST['fecha']
             return render(request, 'estudio/turno.html', {"form": form, "estudio": estudio})
@@ -566,7 +573,6 @@ def descargar_estudio(request, id):
 
 def report(request, inter):
     checkeos_session_permisos(request)
-    
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = "attachment; filename=Interpretacion_{0}_{1}.pdf".format(
         inter.estudio.id, inter.estudio.tipoEstudio)
@@ -600,9 +606,7 @@ def report(request, inter):
     c.drawText(texto)
 
     c.showPage()
-
     c.save()
-
     pdf = buffer.getvalue()
     buffer.close()
     response.write(pdf)
