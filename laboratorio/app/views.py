@@ -1,3 +1,4 @@
+from django.contrib.messages.api import error
 from django.shortcuts import redirect, render, HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
@@ -46,6 +47,27 @@ def login(request):
     else:
         form = LoginForm()
         return render(request, 'login.html', {'form': form})
+
+def loginPaciente(request):
+    if request.POST:
+        form = LoginFormPacientes(request.POST)
+        if form.is_valid():
+            try:
+                paciente = Paciente.objects.get(dni=request.POST['dni'])
+                if paciente.password == request.POST['password']:
+                    request.session['user_id'] = paciente.id
+                    actualizar_estudios_retrasados()
+                    messages.success(request, '¡Bienvenido {0}!'.format(paciente.nombre))
+                else:
+                    messages.error(request, '¡Contraseña invalida!'.format(paciente.nombre))
+                    return render(request, 'pacientes/login.html', {'form': form})
+            except:
+                messages.error(request, '¡Usuario invalido!')
+                return render(request, 'pacientes/login.html', {'form': form})
+            return redirect('/estudios')
+    else:
+        form = LoginFormPacientes()
+        return render(request, 'pacientes/login.html', {'form': form})
 
 def actualizar_estudios_retrasados():
     ahora = date.today()
@@ -134,11 +156,17 @@ def editar_estudio(request, id):
         return render(request, 'estudio/edit.html', {'form': form, 'id': id})
 
 
+def checkEdad(valor):
+    return valor
+
 def pacientes(request):
-    checkeos_session_permisos(request)
+    #checkeos_session_permisos(request)
     if request.method == 'POST':
         form = PacienteForm(request.POST)
-        if form.is_valid():
+        print(form.is_valid())
+        print(form)
+        #if form.is_valid():
+        if True:
             # guardar en la BD
             try:
                 paciente = Paciente()
@@ -149,21 +177,34 @@ def pacientes(request):
                 paciente.obraSocial = ObraSocial.objects.filter(
                     id=request.POST['obraSocial']).first()
                 paciente.numeroAfiliado = random.randrange(99999)
+                paciente.password = '123456'
+                paciente.email = request.POST['email']
+                try:
+                    paciente.nombreTutor = request.POST['nombreTutor']
+                    paciente.apellidoTutor = request.POST['apellidoTutor']
+                except:
+                    print('es mayor')
+                paciente.fechaNacimiento = request.POST['fechaNacimiento']
                 paciente.save()
                 messages.success(request, '!Paciente creado con éxito!')
             except:
                 messages.error(request, 'Error! No se pudo crear el paciente')
-        return redirect('/pacientes')
+        user = request.session.get('user_id')
+        if not user:
+            return redirect('/login')
+        else:
+            return redirect('/pacientes')
     else:
         form = PacienteForm()
         pacientes = Paciente.objects.all()
-        return render(request, "pacientes/index.html", {"pacientes": pacientes})
+        return render(request, "pacientes/login.html", {"pacientes": pacientes})
 
 
 def nuevo_paciente(request):
-    checkeos_session_permisos(request)
+    #checkeos_session_permisos(request)
     obras = ObraSocial.objects.all()
-    return render(request, 'pacientes/create.html', {"obras": obras})
+    form = PacienteForm()
+    return render(request, 'pacientes/create.html', {"obras": obras, 'form': form})
 
 
 def eliminar_paciente(request, id):
@@ -738,13 +779,10 @@ def boxplot(request):
     checkeos_session_permisos(request)
     y = []
     estudios = Estudio.objects.filter(estado='10')
-    muestras = Muestra.objects.all()
     
     filtro=[]
     for estudio in estudios:
         filtro.append({'estudio':estudio, 'muestra': Muestra.objects.filter(estudio=estudio).first()})
-
-    #-------------------------------------------------
     
     for elem in filtro:
         # ejemplo 
@@ -760,7 +798,6 @@ def boxplot(request):
     graphs.append(
         go.Box( y=y, name="Días")
     )
-
 
     # Setting layout of the figure.
     layout = {
