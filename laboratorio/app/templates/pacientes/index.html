@@ -4,7 +4,25 @@
 
 
 {% block content %}
-<a href="{% url 'Registrar Paciente' %}" class="btn btn-success mb-3">Crear Paciente</a>
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+
+      {% if message.tags == 'error' %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<!-- <a href="{% url 'Registrar Paciente' %}" class="btn btn-success mb-3">Crear Paciente</a> -->
 <table class="table table-striped">
   <thead class="thead-dark">
     <tr>

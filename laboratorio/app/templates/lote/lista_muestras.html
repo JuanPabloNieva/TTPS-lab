@@ -1,0 +1,53 @@
+{% extends 'base.html' %} {% block title %}
+<h1 class="m-3 text-center">Muestras del lote n°{{id}}</h1>
+{% endblock %} {% block content %}
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }} messages alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+    <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+    </li>
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+
+<table class="table table-striped" id="estudios">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Lote</th>
+      <th scope="col">Estudio</th>
+      <th scope="col">Persona retiro</th>
+      <th scope="col">Número de freezer</th>
+      <th scope="col">Mililitros extraidos</th>
+      <th scope="col">Fecha</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for muestra in muestras %}
+    <tr>
+      <td>
+        {{muestra.lote.estado}}
+      </td>
+      <td>
+        {{muestra.estudio.tipoEstudio}}
+      </td>
+      <td>
+        {{muestra.personaRetira}}
+      </td>
+      <td>
+        {{muestra.numeroFreezer}}
+      </td>
+      <td>
+        {{muestra.mlExtraidos}}
+      </td>
+      <td>
+        {{muestra.fechaAlta}}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %} {% block title %}
+<h1 class="m-3 text-center">Cargar comprobante</h1>
+{% endblock %} {% block content %}
+<a href="{% url 'Estudios' %}" class="mb-5">Volver</a>
+<div class="mt-5">
+<form action="{% url 'Cargar_Comprobante' id=estudio.id %}" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="row">
+    <div class="col-sm">
+      <div class="form-group">
+        <label
+          >Comprobante de pago</label
+        >
+      </div>
+      <div class="form-group">
+        {{ form.archivo }}
+      </div>
+    </div>
+  </div>
+  <input type="submit" class="btn btn-primary" value="Cargar" />
+</form>
+</div>
+{% endblock %}

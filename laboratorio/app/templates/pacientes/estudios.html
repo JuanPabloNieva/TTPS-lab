@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block title %}
+{% extends 'basePacientes.html' %}{% block title %}
 <h1 class="m-3 text-center">Estudios</h1>
 {% endblock %} {% block content %}
 {% if messages %}
@@ -20,9 +20,6 @@
 </div>
 {% endif %}
 <div class="row ml-1">
-  <a href="{% url 'Crear_Estudio' %}" class="btn btn-success mb-3 col-auto"
-    >Crear Estudio</a
-  >
   <div class="col-auto w-25">
     <input
       class="form-control"
@@ -81,9 +78,6 @@
           >Cargar comprobante</a
         >
           {% endif %}
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
-          >Editar</a
-        >
         {% elif estudio.estado.detalle == "2" %}
         <a
           href="{% url 'Descargar_Consentimiento' id=estudio.id %}"
@@ -91,39 +85,14 @@
           onclick="recargar()"
           >Descargar consentimiento</a
         >
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
-          >Editar</a
-        >
         {% elif estudio.estado.detalle == "3"%}
           {% if not conf.modoPacienteObligado %}
         <a href="{% url 'Cargar_Consentimiento' id=estudio.id %}" class="btn btn-warning mb-2">Cargar consentimiento</a>
           {% endif %}
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
-          >Editar</a
-        >
         {% elif estudio.estado.detalle == "4"%}
           {% if not conf.modoPacienteObligado %}
         <a href="{% url 'Buscar_Turno' id=estudio.id %}" class="btn btn-warning mb-2">Seleccionar turno</a>
           {% endif %}
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
-          >Editar</a
-        >
-        {% elif estudio.estado.detalle == "5" %}
-        <a href="{% url 'Cargar_Muestra' id=estudio.id %}" class="btn btn-warning mb-2">Cargar muestra</a>
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
-          >Editar</a
-        >
-        {% elif estudio.estado.detalle == "6" %}
-        <a href="{% url 'Retiro_Muestra' id=estudio.id %}" class="btn btn-warning mb-2">Cargar retiro muestra</a>
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-info"
-          >Editar</a
-        >
-        {% elif estudio.estado.detalle == "8" %}
-        <a href="{% url 'Cargar_Interpretacion' id=estudio.id %}" class="btn btn-warning mb-2">Cargar interpretación</a>
-        {% elif estudio.estado.detalle == "9" %}
-        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-warning mb-2">Descargar estudio</a>
-        <a href="{% url 'Resultado_Entregado' id=estudio.id %}" class="btn btn-success mb-2">Resultado entregado</a>
-        {% elif estudio.estado.detalle == "10" %}
         <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-dark mb-2">Descargar estudio</a>
         {% endif %}
       </td>

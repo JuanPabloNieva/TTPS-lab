@@ -35,25 +35,33 @@
         {% endfor %}
     </ul>
     </div>
-    {% endif %}
+    {% endif %}  
     <div class=" container mt-5 d-flex justify-content-center">
         <div class="p-5 bg-dark rounded">
             <div class="m-5">
-                <h1 class="text-white">Login Empleado</h1>
+                <h1 class="text-white">Login Paciente</h1>
             </div>
-            <form action="{% url 'Login Empleado' %}" method="post">
+            <form action="{% url 'Login_Paciente' %}" method="post">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label class="text-white" for="{{ form.usuario.id_for_label }}">Nombre de usuario</label>
-                    {{ form.usuario }}
+                    <label class="text-white" for="{{ form.dni.id_for_label }}">DNI</label>
+                    {{ form.dni }}
                 </div>
                 <div class="mb-3">
                     <label class="text-white" for="{{ form.password.id_for_label }}" class="">Contraseña</label>
                     {{ form.password }}
                 </div>
                 <input type="submit" value="Iniciar Sesión" class="btn btn-primary w-100">
-            </form>
-        </div>
+            </form> 
+            <div class="row border-top mt-2">
+                <div class="col-12">
+                    <a href="{% url 'Registrar Paciente'%}" class="btn btn-success w-100 mt-2">Regístrate</a>
+                </div>
+            </div>
+            <div class="mt-5">
+                <a  href="{% url 'Login Empleado' %}" class="btn btn-warning w-100">Ingresar como Empleado</a>
+            </div> 
+        </div>    
     </div>
 </body>
 </html>
