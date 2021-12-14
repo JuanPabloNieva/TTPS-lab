@@ -3,17 +3,27 @@ from django.shortcuts import redirect, render, HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from .models import Comprobante, Consentimiento, ConsentimientoFirmado, Lote, MedicoInformante, Turno, Interpretacion, Patologia, Muestra, Paciente, ObraSocial, MedicoDerivante, TipoEstudio, Empleado, Estudio, Historial, Estado, Configuracion
-from .forms import EstudioForm, InterpretacionForm, LoginForm, MuestraForm, PacienteForm, HistorialForm, ComprobanteForm, ConsentimientoForm, RMuestraForm, TurnoFechaForm, TurnoForm, LoginFormPacientes
+from .forms import ConfirmAccountForm, EstudioForm, InterpretacionForm, LoginForm, MuestraForm, PacienteForm, HistorialForm, ComprobanteForm, ConsentimientoForm, RMuestraForm, TurnoFechaForm, TurnoForm, LoginFormPacientes
 from laboratorio import settings
 from datetime import date, datetime, timedelta
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from dateutil.relativedelta import relativedelta
+from django.core.mail import send_mail, EmailMessage
+
 
 
 from plotly.offline import plot
 import plotly.graph_objects as go
 import io, random, os
+
+email = EmailMessage(
+    "Laboratorio registro",
+    "Felicitaciones se ha registrado",
+    "ale1988valdez@gmail.com",
+    ['ale.v_1988@hotmail.com'],
+    reply_to=['ale.v_1988@hotmail.com']
+)
 
 def checkeos_session_permisos(request):
     user = request.session.get('user_id')
@@ -50,10 +60,15 @@ def login(request):
 
 def login_paciente(request):
     if request.POST:
+        print(request.POST)
         form = LoginFormPacientes(request.POST)
         if form.is_valid():
             try:
                 paciente = Paciente.objects.get(dni=request.POST['dni'])
+                print(paciente.new)
+                if paciente.new:
+                    request.session['user_id'] = paciente.id
+                    return redirect('/pacientes/confirmar_password')
                 if paciente.password == request.POST['password']:
                     request.session['user_id'] = paciente.id
                     actualizar_estudios_retrasados()
@@ -61,13 +76,45 @@ def login_paciente(request):
                 else:
                     messages.error(request, '¡Contraseña invalida!'.format(paciente.nombre))
                     return render(request, 'pacientes/login.html', {'form': form})
-            except:
+            except Exception as e:
+                print(e)
                 messages.error(request, '¡Usuario invalido!')
                 return render(request, 'pacientes/login.html', {'form': form})
             return redirect('/estudios_paciente')
     else:
         form = LoginFormPacientes()
         return render(request, 'pacientes/login.html', {'form': form})
+
+def confirmar_password(request):
+     form = ConfirmAccountForm()
+     return render(request, 'pacientes/confirmPassword.html', {'form':form})
+
+def check_new_password(request):
+    id_paciente = request.session['user_id']
+    form = ConfirmAccountForm()  
+    paciente = Paciente.objects.get(id=id_paciente)
+    if paciente:
+        if paciente.password == request.POST['password_actual']:
+            if request.POST['password_nuevo'] == request.POST['password_nuevo_rep']:
+                paciente.new = False
+                paciente.password = request.POST['password_nuevo']
+                paciente.save()
+                messages.success(request, 'Contraseña Cambiada con exito!')
+                return render(request, 'pacientes/estudios.html')
+            else:
+                messages.error(request, 'Los password nuevo no coinciden')
+                return render(request, 'pacientes/confirmPassword.html', {'form':form})
+        else:
+            messages.error(request, 'La contraseña actual ingresada no es valida')
+            return render(request, 'pacientes/confirmPassword.html', {'form':form})
+    else:
+        messages.error(request, 'Disculpe, hubo un error con el usuario pruebe iniciar sesión de nuevo')
+        del request.session['user_id']
+        request.session.flush()
+        form = LoginFormPacientes()
+        return render(request, 'pacientes/login.html', {'form': form})
+    
+
 
 def actualizar_estudios_retrasados():
     ahora = date.today()
@@ -193,7 +240,12 @@ def pacientes(request):
                 except:
                     print('es mayor')
                 paciente.fechaNacimiento = request.POST['fechaNacimiento']
-                paciente.save()
+                #paciente.save()
+                try:
+                    email.send()
+                except Exception as e:
+                    print(e)
+                    messages.error(request, 'Paciente creado. Error al enviar email')
                 messages.success(request, '¡Paciente creado con éxito!')
             except:
                 messages.error(request, 'Error! No se pudo crear el paciente')

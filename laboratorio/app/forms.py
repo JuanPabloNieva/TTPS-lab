@@ -12,6 +12,14 @@ class LoginForm(forms.Form):
     password = forms.CharField(
         label='Contraseña', required=True, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
+class ConfirmAccountForm(forms.Form):
+    password_actual = forms.CharField(
+        label='Contraseña Actual', required=True, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password_nuevo = forms.CharField(
+        label='Contraseña Nueva', required=True, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password_nuevo_rep = forms.CharField(
+        label='Repita la Contraseña Nueva', required=True, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
 class LoginFormPacientes(forms.Form):
     dni = forms.IntegerField(label='DNI', widget=forms.NumberInput(
         attrs={'class': 'form-control'}), required=True)
@@ -52,7 +60,7 @@ class PacienteForm(forms.Form):
     apellidoTutor = forms.CharField(label='Apellido Tutor', widget=forms.TextInput(
         attrs={'class': 'form-control'}), empty_value='')
     fechaNacimiento =  forms.DateField(label='Fecha de Nacimiento', widget=DateInput(
-        attrs={'class': 'form-control w-50', 'onchange':'checkEdad(event)'}), required=True)
+        attrs={'class': 'form-control', 'onchange':'checkEdad(event)'}), required=True)
     password = forms.CharField(
         label='Contraseña', required=True, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
