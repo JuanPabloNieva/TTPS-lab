@@ -48,5 +48,8 @@
     {% endfor %}
   </tbody>
 </table>
+{% if not lotes %}
+  <p class="alert alert-danger text-center">¡No hay lotes creados!</p>
+{% endif %}
 
 {% endblock %}

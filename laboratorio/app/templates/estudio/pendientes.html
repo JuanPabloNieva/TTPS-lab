@@ -67,6 +67,9 @@
         <input type="submit" class="btn btn-success ml-2" value="Pagar" />
     </form>
 </table>
+{% if not estudios %}
+  <p class="alert alert-danger text-center">¡No hay estudios pendientes!</p>
+{% endif %}
 
 
 <script>

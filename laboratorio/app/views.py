@@ -83,34 +83,34 @@ def login_paciente(request):
         form = LoginFormPacientes()
         return render(request, 'pacientes/login.html', {'form': form})
 
-def confirmar_password(request):
-     form = ConfirmAccountForm()
-     return render(request, 'pacientes/confirmPassword.html', {'form':form})
+# def confirmar_password(request):
+#      form = ConfirmAccountForm()
+#      return render(request, 'pacientes/confirmPassword.html', {'form':form})
 
-def check_new_password(request):
-    id_paciente = request.session['user_id']
-    form = ConfirmAccountForm()  
-    paciente = Paciente.objects.get(id=id_paciente)
-    if paciente:
-        if paciente.password == request.POST['password_actual']:
-            if request.POST['password_nuevo'] == request.POST['password_nuevo_rep']:
-                paciente.new = False
-                paciente.password = request.POST['password_nuevo']
-                paciente.save()
-                messages.success(request, 'Contraseña Cambiada con exito!')
-                return render(request, 'pacientes/estudios.html')
-            else:
-                messages.error(request, 'Los password nuevo no coinciden')
-                return render(request, 'pacientes/confirmPassword.html', {'form':form})
-        else:
-            messages.error(request, 'La contraseña actual ingresada no es valida')
-            return render(request, 'pacientes/confirmPassword.html', {'form':form})
-    else:
-        messages.error(request, 'Disculpe, hubo un error con el usuario pruebe iniciar sesión de nuevo')
-        del request.session['user_id']
-        request.session.flush()
-        form = LoginFormPacientes()
-        return render(request, 'pacientes/login.html', {'form': form})
+# def check_new_password(request):
+#     id_paciente = request.session['user_id']
+#     form = ConfirmAccountForm()  
+#     paciente = Paciente.objects.get(id=id_paciente)
+#     if paciente:
+#         if paciente.password == request.POST['password_actual']:
+#             if request.POST['password_nuevo'] == request.POST['password_nuevo_rep']:
+#                 paciente.new = False
+#                 paciente.password = request.POST['password_nuevo']
+#                 paciente.save()
+#                 messages.success(request, 'Contraseña Cambiada con exito!')
+#                 return render(request, 'pacientes/estudios.html')
+#             else:
+#                 messages.error(request, 'Los password nuevo no coinciden')
+#                 return render(request, 'pacientes/confirmPassword.html', {'form':form})
+#         else:
+#             messages.error(request, 'La contraseña actual ingresada no es valida')
+#             return render(request, 'pacientes/confirmPassword.html', {'form':form})
+#     else:
+#         messages.error(request, 'Disculpe, hubo un error con el usuario pruebe iniciar sesión de nuevo')
+#         del request.session['user_id']
+#         request.session.flush()
+#         form = LoginFormPacientes()
+#         return render(request, 'pacientes/login.html', {'form': form})
     
 
 
@@ -138,14 +138,14 @@ def logout(request):
 
 def estudios(request):
     checkeos_session_permisos(request)
-    estudios = Estudio.objects.all()
+    estudios = Estudio.objects.all().order_by('-paciente')
     conf = Configuracion.objects.all().first()
     return render(request, 'estudio/index.html', {'estudios': estudios, 'conf': conf})
 
 def estudios_paciente(request):
     checkeos_session_permisos(request)
     id_paciente = request.session['user_id']
-    estudios = Estudio.objects.filter(paciente=id_paciente)
+    estudios = Estudio.objects.filter(paciente=id_paciente).order_by('-fechaAlta')
     return render(request, 'pacientes/estudios.html', {'estudios': estudios})
 
 def nuevo_estudio(request):
@@ -223,6 +223,48 @@ def ver_consentimiento_firmado(request, id):
         messages.error(request, '¡No se ha cargado Consentimiento informado firmado para este estudio!')
     return redirect('/estudios/detalle/{0}'.format(id))
 
+def eliminar_consentimiento_firmado(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    consentimiento = ConsentimientoFirmado.objects.filter(estudio=estudio).first()
+    if consentimiento:
+        try:
+            Consentimiento.delete(consentimiento)
+            estudio.estado = Estado.objects.filter(detalle="3").first()
+            estudio.save()
+            messages.success(request, '¡Consentimiento eliminado con éxito!')
+        except:
+            messages.error(request, '¡No se pudo borrar el Consentimiento Informado Firmado!')
+    else:
+        messages.warning(request, '¡No se ha cargado ningún consentimiento firmado por el momento!')
+    return redirect('/estudios/detalle/{0}'.format(id))
+
+def ver_comprobante_pago(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.get(id=id)
+    nombre = Comprobante.objects.filter(estudio=estudio.id).first()
+    if nombre:
+        file_path = os.path.join(settings.MEDIA_ROOT, nombre.archivo.name)
+        webbrowser.open_new(file_path)
+    else:
+        messages.error(request, '¡No se ha cargado Comprobante de pago para este estudio!')
+    return redirect('/estudios/detalle/{0}'.format(id))
+
+def eliminar_comprobante_pago(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    comprobante = Comprobante.objects.filter(estudio=estudio).first()
+    if comprobante:
+        try:
+            Consentimiento.delete(comprobante)
+            estudio.estado = Estado.objects.filter(detalle="1").first()
+            estudio.save()
+            messages.success(request, '¡Comprobante eliminado con éxito!')
+        except:
+            messages.error(request, '¡No se pudo borrar el Comprobante de Pago!')
+    else:
+        messages.warning(request, '¡No se ha cargado ningún comprobante de pago por el momento!')
+    return redirect('/estudios/detalle/{0}'.format(id))
 
 def pacientes(request):
     # checkeos_session_permisos(request)
@@ -265,7 +307,7 @@ def pacientes(request):
             return redirect('/pacientes')
     else:
         form = PacienteForm()
-        pacientes = Paciente.objects.all()
+        pacientes = Paciente.objects.all().order_by('apellido')
         return render(request, "pacientes/index.html", {"pacientes": pacientes})
 
 

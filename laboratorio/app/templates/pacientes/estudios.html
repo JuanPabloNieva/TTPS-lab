@@ -100,7 +100,9 @@
     {% endfor %}
   </tbody>
 </table>
-
+{% if not estudios %}
+  <p class="alert alert-danger text-center">¡No hay estudios realizados del paciente!</p>
+{% endif %}
 <script>
   function recargar() {
     setTimeout(function () {
