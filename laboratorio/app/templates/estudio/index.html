@@ -51,13 +51,13 @@
     {% for estudio in estudios %}
     <tr>
       <td id="paciente">
-        {{estudio.paciente.nombre}} {{estudio.paciente.apellido}}
+        {{estudio.paciente.apellido}} {{estudio.paciente.nombre}}
       </td>
       <td>
-        {{estudio.medicoDerivante.nombre}} {{estudio.medicoDerivante.apellido}}
+        {{estudio.medicoDerivante.apellido}} {{estudio.medicoDerivante.nombre}}
       </td>
       <td>{{estudio.tipoEstudio}}</td>
-      <td>{{estudio.estado.nombre}}</td>
+      <td><strong>{{estudio.estado.nombre}}</strong></td>
       {% if estudio.abonado %}
       <td>SI</td>
       {% else %}

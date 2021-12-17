@@ -138,14 +138,14 @@ def logout(request):
 
 def estudios(request):
     checkeos_session_permisos(request)
-    estudios = Estudio.objects.all().order_by('-paciente')
+    estudios = Estudio.objects.all().order_by('paciente__apellido')
     conf = Configuracion.objects.all().first()
     return render(request, 'estudio/index.html', {'estudios': estudios, 'conf': conf})
 
 def estudios_paciente(request):
     checkeos_session_permisos(request)
     id_paciente = request.session['user_id']
-    estudios = Estudio.objects.filter(paciente=id_paciente).order_by('-fechaAlta')
+    estudios = Estudio.objects.filter(paciente=id_paciente).order_by('fechaAlta')
     return render(request, 'pacientes/estudios.html', {'estudios': estudios})
 
 def nuevo_estudio(request):
