@@ -9,6 +9,8 @@ urlpatterns = [
     path('estudios_paciente', views.estudios_paciente, name='Estudios_Paciente'),
     path('estudios/nuevo', views.nuevo_estudio, name='Crear_Estudio'),
     path('estudios/editar/<id>', views.editar_estudio, name='Editar_Estudio'),
+    path('estudios/detalle/<id>', views.detalle_estudio, name='Detalle_Estudio'),
+    path('estudios/ver_consentimiento/<id>', views.ver_consentimiento_firmado, name='Consentimiento_Firmado'),
     path('estudios/pendientes', views.pendientes, name='Pendientes'),
     path('estudios/cargar_comprobante/<id>',
          views.cargar_comprobante, name='Cargar_Comprobante'),

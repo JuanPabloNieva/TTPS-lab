@@ -1,0 +1,70 @@
+{% extends 'base.html' %} {% block title %}
+<h1 class="m-3 text-center">Estudio</h1>
+{% endblock %} {% block content %}
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+
+      {% if message.tags == 'error'  %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<a href="{% url 'Estudios' %}" class="mb-5">Volver</a>
+<div class="d-flex flex-column bg-secondary p-5 m-5">
+  <div class="d-flex flex-column">
+    <h2 class="m-auto text-white">Paciente</h2>
+    <p class="m-auto">{{ estudio.paciente.nombre }} {{ estudio.paciente.apellido }}</p>
+  </div>
+  <div class="d-flex flex-column">
+    <h2 class="m-auto text-white">Médico Derivante</h2>
+    <p class="m-auto">{{ estudio.medicoDerivante.nombre }} {{ estudio.medicoDerivante.apellido }}</p>
+  </div>
+  <div class="d-flex flex-column">
+    <h2 class="m-auto text-white">Estado</h2>
+    <p class="m-auto">{{ estudio.estado.nombre }}</p>
+  </div>
+  <div class="d-flex flex-column">
+    <h2 class="m-auto text-white">Workflow</h2>
+    <div class="m-auto d-flex">
+      <p class="bg-success p-2 text-center rounded-4">Estado que paso</p>
+      <p class="bg-warning p-2 text-center rounded-4">Estado actual</p>
+      <p class="bg-danger p-2 text-center rounded-4">Estado que falta</p>  
+    </div>
+    <div class="m-auto">
+      <ol class="bg-white m-4">
+        {% for estado in estados %}
+        {% if estado.id != 11 %}
+          {% if estado.id < estudio.estado.id %}
+            <li class="bg-success p-1">{{ estado.nombre }}</li>
+          {% elif estado.id == estudio.estado.id %}
+            <li class="bg-warning p-1">{{ estado.nombre }}</li>
+          {% else %}
+            <li class="bg-danger p-1">{{ estado.nombre }}</li>
+          {% endif %}
+        {% endif %}
+        {% endfor %}
+        </ol>
+    </div>
+  </div>
+  <div class="d-flex justify-content-around">
+    <div class="d-flex flex-column justify-content-around">
+      <a href="{% url 'Consentimiento_Firmado' id=estudio.id %}" class="btn btn-dark m-2">Ver consentimiento firmado</a>
+      <a href="#" class="btn btn-danger m-2">Marcar consentimiento inválido</a>    
+    </div>
+    <div class="d-flex flex-column justify-content-around">
+      <a href="#" class="btn btn-dark m-2">Ver comprobante de pago</a>
+      <a href="#" class="btn btn-danger m-2">Marcar comprobante inválido</a>    
+    </div>
+  </div>
+</div>
+{% endblock %}

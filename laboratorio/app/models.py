@@ -152,7 +152,7 @@ class ConsentimientoFirmado(models.Model):
     archivo = models.FileField(upload_to='consentimientosFirmados/')
 
     def __str__(self):
-        return '{0}'.format(self.tipoEstudio)
+        return '{0}'.format(self.estudio)
 
 
 class Interpretacion(models.Model):

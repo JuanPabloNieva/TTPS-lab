@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from dateutil.relativedelta import relativedelta
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import message, send_mail, EmailMessage
 
 
 
@@ -60,15 +60,14 @@ def login(request):
 
 def login_paciente(request):
     if request.POST:
-        print(request.POST)
         form = LoginFormPacientes(request.POST)
         if form.is_valid():
             try:
                 paciente = Paciente.objects.get(dni=request.POST['dni'])
-                print(paciente.new)
-                if paciente.new:
-                    request.session['user_id'] = paciente.id
-                    return redirect('/pacientes/confirmar_password')
+                # print(paciente.new)
+                # if paciente.new:
+                #     request.session['user_id'] = paciente.id
+                #     return redirect('/pacientes/confirmar_password')
                 if paciente.password == request.POST['password']:
                     request.session['user_id'] = paciente.id
                     actualizar_estudios_retrasados()
@@ -76,8 +75,7 @@ def login_paciente(request):
                 else:
                     messages.error(request, '¡Contraseña invalida!'.format(paciente.nombre))
                     return render(request, 'pacientes/login.html', {'form': form})
-            except Exception as e:
-                print(e)
+            except:
                 messages.error(request, '¡Usuario invalido!')
                 return render(request, 'pacientes/login.html', {'form': form})
             return redirect('/estudios_paciente')
@@ -145,6 +143,7 @@ def estudios(request):
     return render(request, 'estudio/index.html', {'estudios': estudios, 'conf': conf})
 
 def estudios_paciente(request):
+    checkeos_session_permisos(request)
     id_paciente = request.session['user_id']
     estudios = Estudio.objects.filter(paciente=id_paciente)
     return render(request, 'pacientes/estudios.html', {'estudios': estudios})
@@ -206,12 +205,27 @@ def editar_estudio(request, id):
         form = EstudioForm(initial_dict)
         return render(request, 'estudio/edit.html', {'form': form, 'id': id})
 
+def detalle_estudio(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.get(id=id)
+    estados = Estado.objects.all()
+    return render(request, 'estudio/detalle.html', {'estudio': estudio, 'estados': estados,'id': id})
 
-def checkEdad(valor):
-    return valor
+import webbrowser
+def ver_consentimiento_firmado(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.get(id=id)
+    nombre = ConsentimientoFirmado.objects.filter(estudio=estudio.id).first()
+    if nombre:
+        file_path = os.path.join(settings.MEDIA_ROOT, nombre.archivo.name)
+        webbrowser.open_new(file_path)
+    else:
+        messages.error(request, '¡No se ha cargado Consentimiento informado firmado para este estudio!')
+    return redirect('/estudios/detalle/{0}'.format(id))
+
 
 def pacientes(request):
-    #checkeos_session_permisos(request)
+    checkeos_session_permisos(request)
     if request.method == 'POST':
         form = PacienteForm(request.POST)
         print(form.is_valid())
@@ -240,12 +254,12 @@ def pacientes(request):
                 except:
                     print('es mayor')
                 paciente.fechaNacimiento = request.POST['fechaNacimiento']
-                #paciente.save()
-                try:
-                    email.send()
-                except Exception as e:
-                    print(e)
-                    messages.error(request, 'Paciente creado. Error al enviar email')
+                paciente.save()
+                # try:
+                #     email.send()
+                # except Exception as e:
+                #     print(e)
+                #     messages.error(request, 'Paciente creado. Error al enviar email')
                 messages.success(request, '¡Paciente creado con éxito!')
             except:
                 messages.error(request, 'Error! No se pudo crear el paciente')
