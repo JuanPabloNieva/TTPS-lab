@@ -225,44 +225,39 @@ def ver_consentimiento_firmado(request, id):
 
 
 def pacientes(request):
-    checkeos_session_permisos(request)
+    # checkeos_session_permisos(request)
     if request.method == 'POST':
         form = PacienteForm(request.POST)
         print(form.is_valid())
         print(request.POST)
         #if form.is_valid():
-        if True:
+        # if True:
             # guardar en la BD
+        try:
+            paciente = Paciente()
+            paciente.nombre = request.POST['nombre']
+            paciente.apellido = request.POST['apellido']
+            paciente.telefono = request.POST['telefono']
+            paciente.obraSocial = ObraSocial.objects.filter(
+                id=request.POST['obraSocial']).first()
+            paciente.numeroAfiliado = random.randrange(99999)
+            paciente.password = request.POST['password']
+            paciente.email = request.POST['email']
+            existe = Paciente.objects.filter(dni=request.POST['dni']).first()
+            if existe:
+                messages.error(request, 'El dni ingresado ya se encuentra registrado en el sistema')
+            else:
+                paciente.dni = request.POST['dni']
             try:
-                paciente = Paciente()
-                paciente.nombre = request.POST['nombre']
-                paciente.apellido = request.POST['apellido']
-                paciente.telefono = request.POST['telefono']
-                paciente.obraSocial = ObraSocial.objects.filter(
-                    id=request.POST['obraSocial']).first()
-                paciente.numeroAfiliado = random.randrange(99999)
-                paciente.password = request.POST['password']
-                paciente.email = request.POST['email']
-                existe = Paciente.objects.filter(dni=request.POST['dni']).first()
-                if existe:
-                    messages.error(request, 'El dni ingresado ya se encuentra registrado en el sistema')
-                else:
-                    paciente.dni = request.POST['dni']
-                try:
-                    paciente.nombreTutor = request.POST['nombreTutor']
-                    paciente.apellidoTutor = request.POST['apellidoTutor']
-                except:
-                    print('es mayor')
-                paciente.fechaNacimiento = request.POST['fechaNacimiento']
-                paciente.save()
-                # try:
-                #     email.send()
-                # except Exception as e:
-                #     print(e)
-                #     messages.error(request, 'Paciente creado. Error al enviar email')
-                messages.success(request, '¡Paciente creado con éxito!')
+                paciente.nombreTutor = request.POST['nombreTutor']
+                paciente.apellidoTutor = request.POST['apellidoTutor']
             except:
-                messages.error(request, 'Error! No se pudo crear el paciente')
+                print('es mayor')
+            paciente.fechaNacimiento = request.POST['fechaNacimiento']
+            paciente.save()
+            messages.success(request, '¡Paciente creado con éxito!')
+        except:
+            messages.error(request, 'Error! No se pudo crear el paciente')
         user = request.session.get('user_id')
         if not user:
             return redirect('/login')

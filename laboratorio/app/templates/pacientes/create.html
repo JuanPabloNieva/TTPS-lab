@@ -71,7 +71,14 @@
                 </div>
               </div>
               <div class="row" id="tutor">
-            
+                <div class="col-sm">
+                  <label class="text-white" >Nombre tutor</label>
+                  {{form.nombreTutor}}
+                </div>
+                <div class="col-sm">
+                  <label class="text-white">Apellido tutor</label>
+                  {{form.apellidoTutor}}
+                </div>
               </div>
               <div class="row">
                 <div class="col-sm">
@@ -118,38 +125,46 @@
         var fec_actual = new Date();
         var fec_anio = fec_actual.getFullYear();
         var edad = fec_anio - anio;
-        if (edad >= 18) {
-          document.getElementById("tutor").innerHTML = "";
-        } else {
-          //Agregar campos para tutor
-          mainDiv = document.getElementById("tutor");
-          mainDiv.innerHTML=""
 
-          divCol1 =  document.createElement("div");
-          divCol2 =  document.createElement("div");
-
-          divCol1.classList.add("col-sm")
-          divCol2.classList.add("col-sm")
-
-          label1 = document.createElement("label")
-          label1.setAttribute('for', '{{ form.nombreTutor.id_for_label }}' )
-          text1 = document.createTextNode("Nombre Tutor")
-          label1.appendChild(text1)
-          
-          label2 = document.createElement("label")
-          label2.setAttribute('for', '{{ form.apellidoTutor.id_for_label }}' )
-          text2 = document.createTextNode("Apellido Tutor")
-          label2.appendChild(text2)
-          
-          divCol1.innerHTML = '{{form.nombreTutor}}'
-          divCol1.appendChild(label1)
-          divCol2.innerHTML = '{{form.apellidoTutor}}'
-          divCol2.appendChild(label2)
-          
-          mainDiv.appendChild(divCol1)
-          mainDiv.appendChild(divCol2)
+        elemento = document.getElementById("tutor")
         
+        if (edad >= 18) {
+          elemento.style.display = "none"
+        }else{
+          elemento.style.display = ""
         }
+        // if (edad >= 18) {
+        //   document.getElementById("tutor").innerHTML = "";
+        // } else {
+        //   //Agregar campos para tutor
+        //   mainDiv = document.getElementById("tutor");
+        //   mainDiv.innerHTML=""
+
+        //   divCol1 =  document.createElement("div");
+        //   divCol2 =  document.createElement("div");
+
+        //   divCol1.classList.add("col-sm")
+        //   divCol2.classList.add("col-sm")
+
+        //   label1 = document.createElement("label")
+        //   label1.setAttribute('for', '{{ form.nombreTutor.id_for_label }}' )
+        //   text1 = document.createTextNode("Nombre Tutor")
+        //   label1.appendChild(text1)
+          
+        //   label2 = document.createElement("label")
+        //   label2.setAttribute('for', '{{ form.apellidoTutor.id_for_label }}' )
+        //   text2 = document.createTextNode("Apellido Tutor")
+        //   label2.appendChild(text2)
+          
+        //   divCol1.innerHTML = '{{form.nombreTutor}}'
+        //   divCol1.appendChild(label1)
+        //   divCol2.innerHTML = '{{form.apellidoTutor}}'
+        //   divCol2.appendChild(label2)
+          
+        //   mainDiv.appendChild(divCol1)
+        //   mainDiv.appendChild(divCol2)
+        
+        // }
       }
     </script>
 
