@@ -209,7 +209,8 @@ def detalle_estudio(request, id):
     checkeos_session_permisos(request)
     estudio = Estudio.objects.get(id=id)
     estados = Estado.objects.all()
-    return render(request, 'estudio/detalle.html', {'estudio': estudio, 'estados': estados,'id': id})
+    conf = Configuracion.objects.all().first()
+    return render(request, 'estudio/detalle.html', {'estudio': estudio, 'estados': estados,'id': id, 'conf': conf})
 
 import webbrowser
 def ver_consentimiento_firmado(request, id):
