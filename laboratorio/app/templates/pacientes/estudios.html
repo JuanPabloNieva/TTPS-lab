@@ -33,7 +33,6 @@
 <table class="table table-striped" id="estudios">
   <thead class="thead-dark">
     <tr>
-      <th scope="col">Paciente</th>
       <th scope="col">Médico Derivante</th>
       <th scope="col">Tipo Estudio</th>
       <th scope="col">Estado</th>
@@ -48,9 +47,6 @@
   <tbody>
     {% for estudio in estudios %}
     <tr>
-      <td id="paciente">
-        {{estudio.paciente.nombre}} {{estudio.paciente.apellido}}
-      </td>
       <td>
         {{estudio.medicoDerivante.nombre}} {{estudio.medicoDerivante.apellido}}
       </td>
