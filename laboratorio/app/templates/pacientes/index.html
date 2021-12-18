@@ -26,22 +26,22 @@
 <table class="table table-striped">
   <thead class="thead-dark">
     <tr>
-      <th scope="col">Nombre</th>
       <th scope="col">Apellido</th>
+      <th scope="col">Nombre</th>
       <th scope="col">DNI</th>
       <th scope="col">Telefono</th>
       <th scope="col">Nro Afiliado</th>
       <th scope="col">Obra Social</th>
       <th scope="col">Historia Clinica</th>
-      <th scope="col">Editar</th>
+      <!-- <th scope="col">Editar</th> -->
       <th scope="col">Borrar</th>
     </tr>
   </thead>
   <tbody>
     {% for paciente in pacientes %}
     <tr>
-      <td>{{paciente.nombre}}</td>
       <td>{{paciente.apellido}}</td>
+      <td>{{paciente.nombre}}</td>
       <td>{{paciente.dni}}</td>
       <td>{{paciente.telefono}}</td>
       <td>{{paciente.numeroAfiliado}}</td>
@@ -49,7 +49,7 @@
       <td>
         <a href="historial/paciente/{{paciente.id}}">Ver</a>
       </td>
-      <td><a href="pacientes/editar/{{paciente.id}}" class="btn btn-info">Editar</a></td>
+      <!-- <td><a href="pacientes/editar/{{paciente.id}}" class="btn btn-info">Editar</a></td> -->
       <td><a href="pacientes/eliminar/{{paciente.id}}" class="btn btn-danger">Eliminar</a></td>
     </tr>
     {% endfor %}

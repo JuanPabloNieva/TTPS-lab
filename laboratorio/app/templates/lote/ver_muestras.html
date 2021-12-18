@@ -31,12 +31,12 @@
       <th scope="col">Número de freezer</th>
       <th scope="col">Mililitros extraidos</th>
       <th scope="col">Fecha</th>
-      <th scope="col">Muestra Insuficiente</th>
+      <th scope="col">Resultado</th>
     </tr>
   </thead>
-  <form action="{% url 'Finalizar_Proceso' id=id %}" method="POST">
+
     <tbody>
-      {% csrf_token %}
+     
       {% for muestra in muestras %}
       <tr>
         <td>
@@ -60,25 +60,16 @@
         <td>
           {{muestra.fechaAlta}}
         </td>
-        <td class="text-center">
-          <!-- <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="{{muestra.id}}" name="muestras[]"
-                  id="flexCheckDefault">
-          </div> -->
-          {% if muestra.error %}
-          <a href="{% url 'Marcar_Falla' lote_id=id muestra_id=muestra.id %}" class="btn btn-primary">Quitar Fallo</a>
-          {% else%}
-          <a href="{% url 'Marcar_Falla' lote_id=id muestra_id=muestra.id %}" class="btn btn-danger">Marcar Fallo</a>
-          {% endif %}
+        <td>
+            {% if muestra.error %}
+            <p class="alert alert-danger text-center">Fallo</p>
+            {% else %}
+            <p class="alert alert-success text-center">Exitoso</p>
+            {% endif %}
         </td>
       </tr>
     {% endfor %}
     </tbody>
-    <div class="input-group w-50">
-      <input type="text" class="form-control mb-2 " placeholder="Cargar URL del resultado" name="urlResultado" required>
-      <input type="submit" class="btn btn-warning mb-2" value="Cerrar Lote" />
-    </div>
-  </form>
 </table>
 
 {% endblock %}

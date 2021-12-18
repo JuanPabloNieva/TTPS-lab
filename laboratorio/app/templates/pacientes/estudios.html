@@ -48,7 +48,7 @@
     {% for estudio in estudios %}
     <tr>
       <td>
-        {{estudio.medicoDerivante.nombre}} {{estudio.medicoDerivante.apellido}}
+        {{estudio.medicoDerivante.apellido}} {{estudio.medicoDerivante.nombre}}
       </td>
       <td>{{estudio.tipoEstudio}}</td>
       <td>{{estudio.estado.nombre}}</td>
@@ -96,7 +96,9 @@
     {% endfor %}
   </tbody>
 </table>
-
+{% if not estudios %}
+  <p class="alert alert-danger text-center">¡No hay estudios realizados del paciente!</p>
+{% endif %}
 <script>
   function recargar() {
     setTimeout(function () {
