@@ -1,4 +1,5 @@
 from django.contrib.messages.api import error
+from django.http.request import RAISE_ERROR
 from django.shortcuts import redirect, render, HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
@@ -209,8 +210,9 @@ def detalle_estudio(request, id):
     checkeos_session_permisos(request)
     estudio = Estudio.objects.get(id=id)
     estados = Estado.objects.all()
+    muestra = Muestra.objects.filter(estudio=id).exclude(error=True).first()
     conf = Configuracion.objects.all().first()
-    return render(request, 'estudio/detalle.html', {'estudio': estudio, 'estados': estados,'id': id, 'conf': conf})
+    return render(request, 'estudio/detalle.html', {'estudio': estudio, 'estados': estados,'id': id, 'conf': conf, 'muestra': muestra})
 
 import webbrowser
 def ver_consentimiento_firmado(request, id):
@@ -423,8 +425,8 @@ def pagar_estudios(request):
     checkeos_session_permisos(request)
     abonar = request.POST.getlist('estudios[]')
     try:
-        for id in abonar:
-            estudio = Estudio.objects.filter(id=id).first()
+        for id_abonar in abonar:
+            estudio = Estudio.objects.filter(id=id_abonar).first()
             estudio.abonado = True
             estudio.save()
         if abonar:
@@ -666,22 +668,46 @@ def lotes(request):
 
 
 def finalizar_proceso(request, id):
+    checkeos_session_permisos(request)
     lote = Lote.objects.filter(id=id)
     lote.update(estado='Procesado')
     muestras = Muestra.objects.filter(lote=id)
 
-    for muestra in muestras:
-        Estudio.objects.filter(id=muestra.estudio.id).update(estado="8")
-
+    try:
+        if not request.POST['urlResultado']:
+            messages.error(request, '¡La URL del resultado es obligatoria!')
+            return render(request, 'lote/lista_muestras.html', {'muestras': muestras, 'id': id})
+        for muestra in muestras:
+            if muestra.error:
+                print(muestra.estudio.paciente.nombre)
+                estudio = Estudio.objects.filter(id=muestra.estudio.id).update(estado="4")
+            else:  
+                lote.update(urlResultado=request.POST['urlResultado']) 
+                Estudio.objects.filter(id=muestra.estudio.id).update(estado="8")
+        messages.success(request, '¡Lote cerrado con éxito!')
+    except:
+        messages.error(request, '¡No se pudo cerrar el lote!')
     return redirect('/estudios')
 
 
 def listar_muestras(request, id):
     checkeos_session_permisos(request)
-    muestras = Muestra.objects.filter(lote=id)
+    muestras = Muestra.objects.filter(lote=id).order_by('estudio__paciente__apellido')
 
     return render(request, 'lote/lista_muestras.html', {'muestras': muestras, 'id': id})
 
+def ver_muestras(request, id):
+    checkeos_session_permisos(request)
+    muestras = Muestra.objects.filter(lote=id).order_by('estudio__paciente__apellido')
+    return render(request, 'lote/ver_muestras.html', {'muestras': muestras, 'id': id})
+
+def marcar_falla(request, lote_id, muestra_id):
+    checkeos_session_permisos(request)
+    muestras = Muestra.objects.all().order_by('estudio__paciente__apellido')
+    muestra = muestras.filter(id=muestra_id).first()
+    muestra.error = not muestra.error
+    muestra.save()
+    return redirect('/estudios/lote/{0}/lista_muestras'.format(lote_id))
 # -----------------------------------RESULTADOS--------------------------------------------
 
 

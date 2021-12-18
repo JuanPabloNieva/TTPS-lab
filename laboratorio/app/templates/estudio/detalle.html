@@ -74,6 +74,12 @@
         </ol>
     </div>
   </div>
+  <div class="d-flex mb-3">
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-light m-auto" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      Ver datos de muestra
+    </button>
+  </div>
   <div class="d-flex justify-content-center">
     <div class="d-flex flex-column justify-content-around">
       <a href="{% url 'Comprobante_Pago' id=estudio.id %}" class="btn btn-info m-2">Ver <strong>COMPROBANTE DE PAGO</strong></a>
@@ -214,6 +220,31 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
         <a href="{% url 'Eliminar_Comprobante_Pago' id=estudio.id %}" type="button" class="btn btn-success">Confirmar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal muestra -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"><strong>Datos de la muestra</strong></h5>
+        <button type="button" class="btn-close btn-dark" data-bs-dismiss="modal" aria-label="Close">X</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>N° Freezer: </strong><em>{% if muestra.numeroFreezer %}{{ muestra.numeroFreezer }}{% else %} Sin asignar {% endif %}</em></p>
+        <hr>
+        <p><strong>Mililitros Extraidos: </strong><em>{% if muestra.mlExtraidos %}{{ muestra.mlExtraidos }}{% else %} 0 {% endif %}</em></p>
+        <hr>
+        <p><strong>Persona que retiró: </strong><em>{% if muestra.personaRetira %}{{ muestra.personaRetira }}{% else %} Sin retirar {% endif %}</em></p>
+        <hr>
+        <p><strong>Fecha de retiro: </strong><em>{% if muestra.fechaRetiro %}{{ muestra.fechaRetiro }}{% else %} Sin retirar {% endif %}</em></p>
+        <hr>
+        <p><strong>N° Lote de muestra: </strong><em>{% if muestra.lote.id %}{{ muestra.lote.id }}{% else %} Sin asignar {% endif %}</em></p>
+        <hr>
+        <p><strong>URL Resultado: </strong><em>{% if muestra.lote.urlResultado %}<a href="#">{{ muestra.lote.urlResultado }}</a>{% else %} Sin asignar {% endif %}</em></p>
       </div>
     </div>
   </div>

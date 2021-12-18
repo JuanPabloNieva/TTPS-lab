@@ -87,6 +87,7 @@ class Muestra(models.Model):
     numeroFreezer = models.BigIntegerField()
     mlExtraidos = models.DecimalField(decimal_places=1, max_digits=3)
     personaRetira = models.CharField(max_length=100, null=True)
+    error = models.BooleanField(default=False)
 
 
 class Turno(models.Model):
@@ -106,6 +107,7 @@ class Factura(models.Model):
 class Lote(models.Model):
     id = models.AutoField(primary_key=True)
     estado = models.CharField(default='En procesamiento', max_length=50)
+    urlResultado = models.CharField(default='Sin cargar', max_length=100)
 
 
 class Historial(models.Model):
