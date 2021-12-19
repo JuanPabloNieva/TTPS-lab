@@ -36,6 +36,7 @@ urlpatterns = [
     path('pacientes', views.pacientes, name='Pacientes'),
     path('pacientes/nuevo', views.nuevo_paciente, name='Registrar Paciente'),
     path('pacientes/eliminar/<id>', views.eliminar_paciente),
+    path('pacientes/detalle/<id>', views.detalle_estudio_paciente, name='Detalle_Estudio_Paciente'),
     path('pacientes/editar/<id>', views.editar_paciente, name="Editar_Paciente"),
     path('pacientes/ver_perfil/<id>', views.ver_perfil, name="Ver_Perfil"),
     path('pacientes/estudio/<id>/cargar_comprobante', views.cargar_comprobante_paciente, name="Cargar_Comprobante_Paciente"),

@@ -337,6 +337,29 @@ def ver_perfil(request, id):
     paciente = Paciente.objects.filter(id=id).first()
     return render(request, 'pacientes/perfil.html', {"paciente": paciente})
 
+def detalle_estudio_paciente(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.get(id=id)
+    estados = Estado.objects.all().order_by('id') #PODRIA ORDENAR POR OTRO CAMPO PARA NO TENER QUE INGRESAR EN ORDEN LOS ESTADOS
+    conf = Configuracion.objects.all().first()
+    estados_paciente = []
+    estado_actual = estudio.estado
+    
+    for estado in estados:
+        if estado.detalle == "1" or estado.detalle == "3" or estado.detalle == "4" or estado.detalle == "5" or estado.detalle == "10":
+            estados_paciente.append(estado)
+        elif estado.detalle == "6": 
+            estado.nombre = 'Esperando Resultado'
+            estados_paciente.append(estado)
+
+    if estudio.estado.detalle == "2":
+        estado_actual = estados.filter(detalle="3").first()
+    elif estudio.estado.detalle == "6" or estudio.estado.detalle == "7" or estudio.estado.detalle == "8" or estudio.estado.detalle == "9":
+        estado_actual = estados.filter(detalle="6").first()
+        estado_actual.nombre = 'Esperando Resultado'
+
+    return render(request, 'pacientes/detalle.html', {'estudio': estudio, 'estados': estados_paciente,'id': id, 'estado_actual': estado_actual,'conf': conf})
+
 def editar_paciente(request, id):
     checkeos_session_permisos(request)
     if request.method == 'POST':
