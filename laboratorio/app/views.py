@@ -209,7 +209,7 @@ def editar_estudio(request, id):
 def detalle_estudio(request, id):
     checkeos_session_permisos(request)
     estudio = Estudio.objects.get(id=id)
-    estados = Estado.objects.all()
+    estados = Estado.objects.all().order_by('id') #PODRIA ORDENAR POR OTRO CAMPO PARA NO TENER QUE INGRESAR EN ORDEN LOS ESTADOS
     muestra = Muestra.objects.filter(estudio=id).exclude(error=True).first()
     conf = Configuracion.objects.all().first()
     return render(request, 'estudio/detalle.html', {'estudio': estudio, 'estados': estados,'id': id, 'conf': conf, 'muestra': muestra})
@@ -283,6 +283,7 @@ def pacientes(request):
             paciente.nombre = request.POST['nombre']
             paciente.apellido = request.POST['apellido']
             paciente.telefono = request.POST['telefono']
+            paciente.direccion = request.POST['direccion']
             paciente.obraSocial = ObraSocial.objects.filter(
                 id=request.POST['obraSocial']).first()
             paciente.numeroAfiliado = random.randrange(99999)
@@ -332,30 +333,34 @@ def eliminar_paciente(request, id):
 
     return redirect('/pacientes')
 
+def ver_perfil(request, id):
+    paciente = Paciente.objects.filter(id=id).first()
+    return render(request, 'pacientes/perfil.html', {"paciente": paciente})
 
 def editar_paciente(request, id):
     checkeos_session_permisos(request)
     if request.method == 'POST':
-        form = PacienteForm(request.POST)
-        if form.is_valid():
-            # guardar en la BD
-            try:
-                paciente = Paciente.objects.get(id=request.POST['id'])
-                paciente.nombre = request.POST['nombre']
-                paciente.apellido = request.POST['apellido']
-                paciente.telefono = request.POST['telefono']
-                paciente.dni = request.POST['dni']
-
-                obraSocial = ObraSocial.objects.filter(
-                    id=request.POST['obraSocial']).first()
-                paciente.obraSocial = obraSocial
-                paciente.save()
-                messages.success(request, '¡Paciente editado con éxito!')
-            except:
-                messages.error(request, 'Error! No se pudo editar al paciente')
-            return redirect('/pacientes')
+        try:
+            paciente = Paciente.objects.get(id=request.POST['id'])
+            paciente.nombre = request.POST['nombre']
+            paciente.apellido = request.POST['apellido']
+            paciente.telefono = request.POST['telefono']
+            paciente.dni = request.POST['dni']
+            paciente.direccion = request.POST['direccion']
+            paciente.email = request.POST['email']
+            if paciente.nombreTutor:
+                paciente.nombreTutor = request.POST['nombreTutor']
+                paciente.apellidoTutor = request.POST['apellidoTutor']
+            obraSocial = ObraSocial.objects.filter(
+                id=request.POST['obraSocial']).first()
+            paciente.obraSocial = obraSocial
+            paciente.save()
+            messages.success(request, '¡Paciente editado con éxito!')
+        except:
+            messages.error(request, 'Error! No se pudo editar al paciente')
+        
+        return redirect('/estudios_paciente')
     else:
-        form = PacienteForm()
         paciente = Paciente.objects.get(id=id)
         obras = ObraSocial.objects.all()
         return render(request, "pacientes/editar.html", {"obras": obras, "paciente": paciente})
@@ -466,6 +471,30 @@ def cargar_comprobante(request, id):
 
     return render(request, 'estudio/comprobante.html', {"form": form, "estudio": estudio})
 
+def cargar_comprobante_paciente(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    if request.method == 'POST':
+        form = ComprobanteForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            try:
+                comprobante = Comprobante()
+                comprobante.estudio = estudio
+                comprobante.archivo = request.FILES['archivo']
+                comprobante.save()
+                estudio.estado = Estado.objects.filter(detalle="2").first()
+                estudio.save()
+
+                messages.success(request,'¡Comprobante cargado con éxito!')
+            except:
+                messages.error(request, '¡No se pudo cargar el comprobante!')
+            return redirect('/estudios_paciente')
+    else:
+        form = ComprobanteForm()
+
+    return render(request, 'pacientes/comprobante.html', {"form": form, "estudio": estudio})
+
 
 def descargar_consentimiento(request, id):
     checkeos_session_permisos(request)
@@ -512,6 +541,29 @@ def cargar_consentimiento(request, id):
         form = ConsentimientoForm()
 
     return render(request, 'estudio/consentimiento.html', {"form": form, "estudio": estudio})
+
+def cargar_consentimiento_paciente(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    if request.method == 'POST':
+        form = ConsentimientoForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                consentimiento = ConsentimientoFirmado()
+                consentimiento.estudio = estudio
+                consentimiento.archivo = request.FILES['archivo']
+                consentimiento.save()
+                estudio.estado = Estado.objects.filter(detalle="4").first()
+                estudio.save()
+                messages.success(request,'¡Consentimiento cargado con éxito!')
+            except:
+                messages.error(request, '¡No se pudo cargar el consentimiento!')
+
+        return redirect('/estudios_paciente')
+    else:
+        form = ConsentimientoForm()
+
+    return render(request, 'pacientes/consentimiento.html', {"form": form, "estudio": estudio})
 
 # --------------------------------------TURNO-----------------------------------------
 
@@ -571,6 +623,72 @@ def buscar_turno_por_fecha(request, id):
         form = TurnoFechaForm()
 
         return render(request, 'estudio/buscar_turno.html', {"form": form, "estudio": estudio})
+
+# --------------------------------------TURNO PACIENTES-----------------------------------------
+
+
+def seleccionar_turno_paciente(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    # HORARIOS IRIA EN SETTINGS PARA QUE SE REALICEN CAMBIOS EN UN UNICO LUGAR
+    horarios = [('09:00:00', '09:00:00'), ('09:15:00', '09:15:00'), ('09:30:00', '09:30:00'), ('09:45:00', '09:45:00'), ('10:00:00', '10:00:00'), ('10:15:00', '10:15:00'), ('10:30:00', '10:30:00'),
+                ('10:45:00', '10:45:00'), ('11:00:00', '11:00:00'), ('11:15:00', '11:15:00'), ('11:30:00', '11:30:00'), ('11:45:00', '11:45:00'), ('12:00:00', '12:00:00'), ('12:15:00', '12:15:00'), ('12:30:00', '12:30:00'), ('12:45:00', '12:45:00'), ('13:00:00', '13:00:00')]
+
+    if request.method == 'POST':
+
+        form = TurnoForm(horarios, request.POST)
+        if form.is_valid():
+            try:
+                turno = Turno()
+                turno.estudio = estudio
+                turno.fecha = request.POST['fecha']
+                turno.hora = datetime.strptime(request.POST['hora'], '%H:%M:%S')
+                turno.save()
+
+                estudio.estado = Estado.objects.filter(detalle="5").first()
+                estudio.save()
+                messages.success(request,'¡Se selecciono el turno con éxito!')
+            except:
+                messages.error(request, '¡No se pudo guardar el turno!')
+
+            return redirect('/estudios_paciente')
+        else:
+            messages.error(request, '¡Los datos ingresados no son válidos!')
+            return render(request, 'pacientes/turno.html', {"form": form, "estudio": estudio})
+    else:
+        form = TurnoForm()
+
+        return render(request, 'pacientes/turno.html', {"form": form, "estudio": estudio})
+
+
+def buscar_turno_por_fecha_paciente(request, id):
+    checkeos_session_permisos(request)
+    horarios = [('09:00:00', '09:00:00'), ('09:15:00', '09:15:00'), ('09:30:00', '09:30:00'), ('09:45:00', '09:45:00'), ('10:00:00', '10:00:00'), ('10:15:00', '10:15:00'), ('10:30:00', '10:30:00'),
+                ('10:45:00', '10:45:00'), ('11:00:00', '11:00:00'), ('11:15:00', '11:15:00'), ('11:30:00', '11:30:00'), ('11:45:00', '11:45:00'), ('12:00:00', '12:00:00'), ('12:15:00', '12:15:00'), ('12:30:00', '12:30:00'), ('12:45:00', '12:45:00'), ('13:00:00', '13:00:00')]
+
+    estudio = Estudio.objects.filter(id=id).first()
+    if request.method == 'POST':
+        formF = TurnoFechaForm(request.POST)
+        if formF.is_valid():
+            turnos_fecha = Turno.objects.filter(fecha=request.POST['fecha'])
+            for turno in turnos_fecha:
+                horarios.remove((str(turno.hora), str(turno.hora)))
+            form = TurnoForm(horarios)
+            form.fields['fecha'].initial = request.POST['fecha']
+            return render(request, 'pacientes/turno.html', {"form": form, "estudio": estudio})
+        else:
+            return render(request, 'pacientes/buscar_turno.html', {"form": formF, "estudio": estudio})
+    else:
+        form = TurnoFechaForm()
+
+        return render(request, 'pacientes/buscar_turno.html', {"form": form, "estudio": estudio})
+
+
+def ver_turnos(request, id):
+    checkeos_session_permisos(request)
+    turnos = Turno.objects.filter(estudio__paciente=id)
+    fechaActual = date.today()
+    return render(request, 'pacientes/turnos.html', {'turnos': turnos, 'fechaActual': fechaActual})
 
 # --------------------------------------MUESTRA-----------------------------------------
 

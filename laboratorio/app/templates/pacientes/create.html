@@ -99,13 +99,20 @@
                   </div>
                 </div>
               </div>
-              <div class="row">
-                
+              <div class="row" id="tutor">
                 <div class="col-sm">
-                  <div class="form-group">
                   <label class="text-white" for="{{ form.telefono.id_for_label }}">Telefono</label>
                   {{form.telefono}}
                   <small id="telefonoHelp" class="form-text text-muted">Ingrese su telefono sin "-"</small>
+                </div>
+                <div class="col-sm">
+                  <label class="text-white" for="{{ form.direccion.id_for_label }}">Dirección</label>
+                  {{form.direccion}}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm">
+                  <div class="form-group">
                   <label class="text-white" for="{{ form.password.id_for_label }}">Contraseña</label>
                   {{form.password}}
                   </div>

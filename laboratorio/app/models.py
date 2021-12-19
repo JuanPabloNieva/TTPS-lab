@@ -37,6 +37,7 @@ class Paciente(models.Model):
     nombreTutor = models.CharField(max_length=100, null=True)
     apellidoTutor = models.CharField(max_length=100, null=True)
     dni = models.BigIntegerField(unique=True)
+    direccion = models.CharField(max_length=100)
     telefono = models.BigIntegerField()
     email = models.CharField(max_length=100)
     numeroAfiliado = models.BigIntegerField()
