@@ -19,7 +19,7 @@
 </ul>
 </div>
 {% endif %}
-<div class="row ml-1">
+<div class="row mb-2">
   <div class="col-auto w-25">
     <input
       class="form-control"
@@ -51,7 +51,15 @@
         {{estudio.medicoDerivante.apellido}} {{estudio.medicoDerivante.nombre}}
       </td>
       <td>{{estudio.tipoEstudio}}</td>
+      {% if estudio.estado.detalle == "2" %}
+      <td>Esperando consentimiento informado firmado</td>
+      {% elif estudio.estado.detalle == "6" or estudio.estado.detalle == "7" or estudio.estado.detalle == "8" or estudio.estado.detalle == "9"%}
+      <td>Esperando resultado</td>
+      {% elif estudio.estado.detalle == "10"%}
+      <td>Resultado completo</td>
+      {% else %}
       <td>{{estudio.estado.nombre}}</td>
+      {% endif %}
       {% if estudio.abonado %}
       <td>SI</td>
       {% else %}

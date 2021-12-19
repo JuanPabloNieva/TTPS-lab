@@ -1,0 +1,96 @@
+{% extends 'basePacientes.html' %} {% block title %}
+<h1 class="m-3 text-center">Perfil del paciente</h1>
+{% endblock %} {% block content %}
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+
+      {% if message.tags == 'error'  %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<a href="{% url 'Estudios_Paciente' %}" class="mb-5">Volver</a>
+<div class="d-flex flex-column border border-info table-secondary p-3 m-4">
+  <div class="d-flex justify-content-around mt-3">
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Paciente</strong></h2>
+      <p class=""><em>{{ paciente.nombre }} {{ paciente.apellido }}</em></p>
+    </div>
+    <div class="d-flex flex-column align-items-center w-100">
+        <h2 class="text-info"><strong>DNI</strong></h2>
+        <p class=""><em>{{ paciente.dni }}</em></p>
+      </div>
+  </div>
+  <div class="d-flex justify-content-around mt-3">
+    <div class="d-flex flex-column align-items-center w-100">
+        <h2 class=" text-info"><strong>F. Nacimiento</strong></h2>
+        <p class=""><em>{{ paciente.fechaNacimiento }}</em></p>
+    </div>
+  {%if not paciente.obraSocial %}
+    <div class="d-flex flex-column align-items-center w-100">
+        <h2 class=" text-info"><strong>Obra Social</strong></h2>
+        <p class=""><em>No tiene</em></p>
+    </div>
+    {% else %}
+    <div class="d-flex flex-column align-items-center w-100">
+        <h2 class=" text-info"><strong>Obra Social</strong></h2>
+        <p class=""><em>{{ paciente.obraSocial.nombre }}</em></p>
+    </div>
+  {% endif %}
+  </div>
+  {% if paciente.nombreTutor %}
+  <div class="d-flex justify-content-around mt-3">
+    <div class="d-flex flex-column align-items-center w-100">
+        <h2 class=" text-info"><strong>Tutor</strong></h2>
+        <p class=""><em>{{ paciente.nombreTutor }} {{ paciente.apellidoTutor }}</em></p>
+    </div>
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Dirección Tutor</strong></h2>
+      <p class=""><em>{{ paciente.direccion }}</em></p>
+    </div>
+  </div>
+  <div class="d-flex justify-content-around mt-3">
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Email Tutor</strong></h2>
+      <p class=""><em>{{ paciente.email }}</em></p>
+    </div>
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Teléfono Tutor</strong></h2>
+      <p class=""><em>{{ paciente.telefono }}</em></p>
+    </div>
+  </div>
+  {% else %}
+ 
+  <div class="d-flex justify-content-around mt-3">
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Email</strong></h2>
+      <p class=""><em>{{ paciente.email }}</em></p>
+    </div>
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Teléfono</strong></h2>
+      <p class=""><em>{{ paciente.telefono }}</em></p>
+    </div>
+  </div>
+  <div class="d-flex justify-content-around mt-3">
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Dirección</strong></h2>
+      <p class=""><em>{{ paciente.direccion }}</em></p>
+    </div>
+    <div class="d-flex flex-column align-items-center w-100">
+        <!-- <h2 class="text-info"><strong>Dirección</strong></h2>
+        <p class=""><em>{{ paciente.direccion }}</em></p> -->
+    </div>
+  </div>
+  {% endif %}
+  <a href="{% url 'Editar_Paciente' id=paciente.id%}" class="m-auto btn btn-warning">Editar Perfil</a>
+{% endblock %}

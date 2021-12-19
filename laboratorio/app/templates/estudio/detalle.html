@@ -183,7 +183,7 @@
         <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-success mb-2">Descargar estudio</a>
         <a href="{% url 'Resultado_Entregado' id=estudio.id %}" class="btn btn-success mb-2">Resultado entregado</a>
         {% elif estudio.estado.detalle == "10" %}
-        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-success mb-2">Descargar estudio</a>
+        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-success mb-2 onclick="recargar()"">Descargar estudio</a>
         {% endif %}
     </div>
   </div>
