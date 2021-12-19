@@ -37,6 +37,7 @@ class Paciente(models.Model):
     nombreTutor = models.CharField(max_length=100, null=True)
     apellidoTutor = models.CharField(max_length=100, null=True)
     dni = models.BigIntegerField(unique=True)
+    direccion = models.CharField(max_length=100)
     telefono = models.BigIntegerField()
     email = models.CharField(max_length=100)
     numeroAfiliado = models.BigIntegerField()
@@ -87,6 +88,7 @@ class Muestra(models.Model):
     numeroFreezer = models.BigIntegerField()
     mlExtraidos = models.DecimalField(decimal_places=1, max_digits=3)
     personaRetira = models.CharField(max_length=100, null=True)
+    error = models.BooleanField(default=False)
 
 
 class Turno(models.Model):
@@ -106,6 +108,7 @@ class Factura(models.Model):
 class Lote(models.Model):
     id = models.AutoField(primary_key=True)
     estado = models.CharField(default='En procesamiento', max_length=50)
+    urlResultado = models.CharField(default='Sin cargar', max_length=100)
 
 
 class Historial(models.Model):
@@ -152,7 +155,7 @@ class ConsentimientoFirmado(models.Model):
     archivo = models.FileField(upload_to='consentimientosFirmados/')
 
     def __str__(self):
-        return '{0}'.format(self.tipoEstudio)
+        return '{0}'.format(self.estudio)
 
 
 class Interpretacion(models.Model):

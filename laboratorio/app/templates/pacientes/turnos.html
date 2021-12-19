@@ -1,0 +1,53 @@
+{% extends 'basePacientes.html' %}
+
+{% block title %} <h1 class="m-3 text-center">Turnos para extracción</h1> {% endblock %}
+
+
+{% block content %}
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+
+      {% if message.tags == 'error' %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<a href="{% url 'Estudios_Paciente' %}" class="mb-5">Volver</a>
+
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Fecha</th>
+      <th scope="col">Hora</th>
+      <th scope="col">Tipo de estudio</th>
+      <th scope="col">Diagnostico Presuntivo</th>
+      <th scope="col">Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for turno in turnos %}
+    <tr>
+      <td>{{turno.fecha}}</td>
+      <td>{{turno.hora}}</td>
+      <td>{{turno.estudio.tipoEstudio}}</td>
+      <td>{{turno.estudio.patologia}}</td>
+      {% if turno.fecha < fechaActual%}
+        <td class="alert alert-danger">Pasado</td>
+      {% else %}
+        <td class="alert alert-success">Próximo</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

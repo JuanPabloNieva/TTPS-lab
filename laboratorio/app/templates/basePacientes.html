@@ -20,7 +20,7 @@
     {% block header %}{% endblock %} {% endblock %}
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-info">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">Laboratorio</a>
         <button
@@ -43,6 +43,12 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'Estudios_Paciente' %}">Estudios</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'Ver_Turnos' id=request.session.user_id %}">Turnos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'Ver_Perfil' id=request.session.user_id %}">Perfil</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'Logout' %}">Cerrar Sesión</a>

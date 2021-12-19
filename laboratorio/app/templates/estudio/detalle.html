@@ -1,0 +1,260 @@
+{% extends 'base.html' %} {% block title %}
+<h1 class="m-3 text-center">Detalle de estudio</h1>
+{% endblock %} {% block content %}
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+
+      {% if message.tags == 'error'  %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<a href="{% url 'Estudios' %}" class="mb-5">Volver</a>
+<div class="d-flex flex-column border border-info table-secondary p-3 m-4">
+  <div class="d-flex justify-content-around mt-3">
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Paciente</strong></h2>
+      <p class=""><em>{{ estudio.paciente.nombre }} {{ estudio.paciente.apellido }}</em></p>
+    </div>
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class=" text-info"><strong>Médico Derivante</strong></h2>
+      <p class=""><em>{{ estudio.medicoDerivante.nombre }} {{ estudio.medicoDerivante.apellido }}</em></p>
+    </div>
+  </div>
+  <div class="d-flex justify-content-around mt-3">
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Estado</strong></h2>
+      <p class=""><em>{{ estudio.estado.nombre }}</em></p>
+    </div>
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Tipo de estudio</strong></h2>
+      <p class=""><em>{{ estudio.tipoEstudio }}</em></p>
+    </div>
+  </div>
+  <div class="d-flex justify-content-around mt-3">
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Diag. Presuntivo</strong></h2>
+      <p class=""><em>{{ estudio.patologia }}</em></p>
+    </div>
+    <div class="d-flex flex-column align-items-center w-100">
+      <h2 class="text-info"><strong>Fecha de alta</strong></h2>
+      <p class=""><em>{{ estudio.fechaAlta }}</em></p>
+    </div>
+  </div>
+  <div class="d-flex flex-column mt-3">
+    <h2 class="m-auto text-info"><strong>Workflow</strong></h2>
+    <div class="m-auto d-flex">
+      <p class="table-success p-2 text-center text-dark"><small>Estado que paso</small></p>
+      <p class="table-warning p-2 text-center text-dark"><small>Estado actual</small></p>
+      <p class="table-danger p-2 text-center text-dark"><small>Estado que falta</small></p>  
+    </div>
+    <div class="m-auto">
+      <ol class="bg-white m-4">
+        {% for estado in estados %}
+        {% if estado.id != 11 %}
+          {% if estado.id < estudio.estado.id %}
+            <li class="table-success text-dark p-1"><del>{{ estado.nombre }}</del></li>
+          {% elif estado.id == estudio.estado.id %}
+            <li class="table-warning text-dark p-1"><strong>{{ estado.nombre }}</strong></li>
+          {% else %}
+            <li class="table-danger text-dark p-1">{{ estado.nombre }}</li>
+          {% endif %}
+        {% endif %}
+        {% endfor %}
+        </ol>
+    </div>
+  </div>
+  <div class="d-flex mb-3">
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-light m-auto" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      Ver datos de muestra
+    </button>
+  </div>
+  <div class="d-flex justify-content-center">
+    <div class="d-flex flex-column justify-content-around">
+      <a href="{% url 'Comprobante_Pago' id=estudio.id %}" class="btn btn-info m-2">Ver <strong>COMPROBANTE DE PAGO</strong></a>
+      {% if estudio.estado.id < 4 %}
+        <!-- <a href="#" class="btn btn-danger m-2">Marcar <strong>COMPROBANTE INVALIDO</strong></a>  -->
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#comprobante">
+          Eliminar <strong>COMPROBANTE INVALIDO</strong>
+        </button>
+      {% else %}
+        <!-- <a href="#" class="btn btn-danger m-2 disabled">Marcar <strong>COMPROBANTE INVALIDO</strong></a>  -->
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-danger m-2 disabled">
+          Eliminar <strong>COMPROBANTE INVALIDO</strong>
+        </button>
+      {% endif %}
+    </div>
+    <div class="d-flex flex-column justify-content-around">
+      <a href="{% url 'Consentimiento_Firmado' id=estudio.id %}" class="btn btn-info m-2">Ver <strong>CONSENTIMIENTO FIRMADO</strong></a>
+      {% if estudio.estado.id < 5 %}
+        <!-- <a href="#" class="btn btn-danger m-2">Marcar <strong>CONSENTIMIENTO INVALIDO</strong></a>  -->
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#consentimiento">
+          Eliminar <strong>CONSENTIMIENTO INVALIDO</strong>
+        </button>
+      {% else %}
+        <!-- <a href="#" class="btn btn-danger m-2 disabled">Marcar <strong>CONSENTIMIENTO INVALIDO</strong></a>  -->
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-danger m-2 disabled">
+          Eliminar <strong>CONSENTIMIENTO INVALIDO</strong>
+        </button>
+      {% endif %}
+    </div>
+    <div class="d-flex flex-column justify-content-around">
+      {% if estudio.estado.detalle == "1"%}
+          {% if not conf.modoPacienteObligado %}
+            <a
+              href="{% url 'Cargar_Comprobante' id=estudio.id %}"
+              class="btn btn-success mb-2"
+              >Cargar comprobante</a
+            >
+          {% else %}
+            <a
+              href="#"
+              class="btn btn-success mb-2 disabled"
+              >Cargar comprobante</a
+            >
+          {% endif %}
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+          >Editar</a
+        >
+        {% elif estudio.estado.detalle == "2" %}
+        <a
+          href="{% url 'Descargar_Consentimiento' id=estudio.id %}"
+          class="btn btn-success mb-2"
+          onclick="recargar()"
+          >Descargar consentimiento</a
+        >
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+          >Editar</a
+        >
+        {% elif estudio.estado.detalle == "3"%}
+          {% if not conf.modoPacienteObligado %}
+            <a href="{% url 'Cargar_Consentimiento' id=estudio.id %}" class="btn btn-success mb-2">Cargar consentimiento</a>
+          {% else %}
+            <a
+              href="#"
+              class="btn btn-success mb-2 disabled"
+              >Cargar consentimiento</a
+            >
+          {% endif %}
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+          >Editar</a
+        >
+        {% elif estudio.estado.detalle == "4"%}
+          {% if not conf.modoPacienteObligado %}
+            <a href="{% url 'Buscar_Turno' id=estudio.id %}" class="btn btn-success mb-2">Seleccionar turno</a>
+          {% else %}
+            <a
+              href="#"
+              class="btn btn-success mb-2 disabled"
+              >Seleccionar turno</a
+            >
+          {% endif %}
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+          >Editar</a
+        >
+        {% elif estudio.estado.detalle == "5" %}
+        <a href="{% url 'Cargar_Muestra' id=estudio.id %}" class="btn btn-success mb-2">Cargar muestra</a>
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+          >Editar</a
+        >
+        {% elif estudio.estado.detalle == "6" %}
+        <a href="{% url 'Retiro_Muestra' id=estudio.id %}" class="btn btn-success mb-2">Cargar retiro muestra</a>
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+          >Editar</a
+        >
+        {% elif estudio.estado.detalle == "8" %}
+        <a href="{% url 'Cargar_Interpretacion' id=estudio.id %}" class="btn btn-success mb-2">Cargar interpretación</a>
+        {% elif estudio.estado.detalle == "9" %}
+        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-success mb-2">Descargar estudio</a>
+        <a href="{% url 'Resultado_Entregado' id=estudio.id %}" class="btn btn-success mb-2">Resultado entregado</a>
+        {% elif estudio.estado.detalle == "10" %}
+        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-success mb-2 onclick="recargar()"">Descargar estudio</a>
+        {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Modal Consentimiento-->
+<div class="modal fade" id="consentimiento" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="consentimientoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="consentimientoLabel">¿Estas seguro de querer borrar el <strong>Consentimiento Informado Firmado</strong>?</h5>
+      </div>
+      <div class="modal-body">
+        Se eliminara el <strong>Consentimiento Informado Firmado</strong> por el paciente/tutor. El estudio volverá al estado <em>"Esperando selección de turno"</em>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+        <a href="{% url 'Eliminar_Consentimiento_Firmado' id=estudio.id %}" type="button" class="btn btn-success">Confirmar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Comprobante-->
+<div class="modal fade" id="comprobante" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="comprobanteLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="comprobanteLabel">¿Estas seguro de querer borrar el <strong>Comprobante de Pago</strong>?</h5>
+      </div>
+      <div class="modal-body">
+        Se eliminara el <strong>Comprobante de pago</strong>. El estudio volverá al estado <em>"Esperando comprobante de pago"</em>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+        <a href="{% url 'Eliminar_Comprobante_Pago' id=estudio.id %}" type="button" class="btn btn-success">Confirmar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal muestra -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"><strong>Datos de la muestra</strong></h5>
+        <button type="button" class="btn-close btn-dark" data-bs-dismiss="modal" aria-label="Close">X</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>N° Freezer: </strong><em>{% if muestra.numeroFreezer %}{{ muestra.numeroFreezer }}{% else %} Sin asignar {% endif %}</em></p>
+        <hr>
+        <p><strong>Mililitros Extraidos: </strong><em>{% if muestra.mlExtraidos %}{{ muestra.mlExtraidos }}{% else %} 0 {% endif %}</em></p>
+        <hr>
+        <p><strong>Persona que retiró: </strong><em>{% if muestra.personaRetira %}{{ muestra.personaRetira }}{% else %} Sin retirar {% endif %}</em></p>
+        <hr>
+        <p><strong>Fecha de retiro: </strong><em>{% if muestra.fechaRetiro %}{{ muestra.fechaRetiro }}{% else %} Sin retirar {% endif %}</em></p>
+        <hr>
+        <p><strong>N° Lote de muestra: </strong><em>{% if muestra.lote.id %}{{ muestra.lote.id }}{% else %} Sin asignar {% endif %}</em></p>
+        <hr>
+        <p><strong>URL Resultado: </strong><em>{% if muestra.lote.urlResultado %}<a href="#">{{ muestra.lote.urlResultado }}</a>{% else %} Sin asignar {% endif %}</em></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function recargar() {
+    setTimeout(function () {
+      location.reload();
+    }, 400);
+  }
+</script>
+{% endblock %}

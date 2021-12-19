@@ -32,19 +32,18 @@
       placeholder="Buscar por texto"
     />
   </div>
-</div>
 <table class="table table-striped" id="estudios">
   <thead class="thead-dark">
     <tr>
-      <th scope="col">Paciente</th>
-      <th scope="col">Médico Derivante</th>
-      <th scope="col">Tipo Estudio</th>
-      <th scope="col">Estado</th>
-      <th scope="col">Abonado</th>
-      <th scope="col">Retrasado</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Paciente&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Médico Derivante&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Tipo Estudio&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Estado&#8593&#8595</th>
+      <th scope="col" >Abonado</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Retrasado&#8593&#8595</th>
       <th scope="col">Fecha Alta</th>
-      <th scope="col">Presupuesto</th>
-      <th scope="col">Diagnostico Presuntivo</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Presupuesto&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Diagnostico Presuntivo&#8593&#8595</th>
       <th scope="col">Acciones</th>
     </tr>
   </thead>
@@ -52,13 +51,13 @@
     {% for estudio in estudios %}
     <tr>
       <td id="paciente">
-        {{estudio.paciente.nombre}} {{estudio.paciente.apellido}}
+        {{estudio.paciente.apellido}} {{estudio.paciente.nombre}}
       </td>
       <td>
-        {{estudio.medicoDerivante.nombre}} {{estudio.medicoDerivante.apellido}}
+        {{estudio.medicoDerivante.apellido}} {{estudio.medicoDerivante.nombre}}
       </td>
       <td>{{estudio.tipoEstudio}}</td>
-      <td>{{estudio.estado.nombre}}</td>
+      <td><strong>{{estudio.estado.nombre}}</strong></td>
       {% if estudio.abonado %}
       <td>SI</td>
       {% else %}
@@ -73,7 +72,7 @@
       <td>{{estudio.presupuesto}}</td>
       <td>{{estudio.patologia}}</td>
       <td>
-        {% if estudio.estado.detalle == "1"%}
+        <!-- {% if estudio.estado.detalle == "1"%}
           {% if not conf.modoPacienteObligado %}
         <a
           href="{% url 'Cargar_Comprobante' id=estudio.id %}"
@@ -125,19 +124,25 @@
         <a href="{% url 'Resultado_Entregado' id=estudio.id %}" class="btn btn-success mb-2">Resultado entregado</a>
         {% elif estudio.estado.detalle == "10" %}
         <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-dark mb-2">Descargar estudio</a>
-        {% endif %}
+        {% endif %} -->
+        <a href="{% url 'Detalle_Estudio' id=estudio.id %}" class="btn btn-info"
+          >Ver detalle</a
+        >
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
-
+{% if not estudios %}
+  <p class="alert alert-danger text-center">¡No hay estudios cargados!</p>
+{% endif %}
 <script>
   function recargar() {
     setTimeout(function () {
       location.reload();
     }, 400);
   }
+
   function filtro() {
     let input, filter, table, opt, td, i, txtValue;
     input = document.getElementById("filtroInputIndex");
@@ -157,5 +162,59 @@
       }
     }
   }
+
+  function ordenar(selector, compFunc) {
+      var mySelector = '.sortable';
+      var myCompFunc = function($td1, $td2, isAsc) {
+        var v1 = $.trim($td1.text()).replace(/,|\s+|%/g, '');
+        var v2 = $.trim($td2.text()).replace(/,|\s+|%/g, '');
+        var pattern = /^\d+(\.\d*)?$/;
+        if (pattern.test(v1) && pattern.test(v2)) {
+          v1 = parseFloat(v1);
+          v2 = parseFloat(v2);
+        }
+
+        return isAsc ? v1 > v2 : v1 < v2;
+      };
+
+      var doSort = function($tbody, index, compFunc, isAsc)
+      {
+        var $trList = $tbody.find("tr");
+        var len = $trList.length;
+        for(var i=0; i<len-1; i++) {
+          for(var j=0; j<len-i-1; j++) {
+            var $td1 = $trList.eq(j).find("td").eq(index);
+            var $td2 = $trList.eq(j+1).find("td").eq(index);
+
+            if (compFunc($td1, $td2, isAsc)) {
+              var t = $trList.eq(j+1);
+              $trList.eq(j).insertAfter(t);
+              $trList = $tbody.find("tr");
+            }
+          }
+        }
+      }
+
+      var init = function() {
+        var $th = $("th" + selector);
+        this.$table = $th.closest("table");
+        var that = this;
+        $th.click(function(){
+          var index = $(this).index();
+          var asc = $(this).attr('data-asc');
+          isAsc = asc === undefined ? true : (asc > 0 ? true : false);
+
+          doSort(that.$table.find("tbody"), index, compFunc, isAsc);
+
+          $(this).attr('data-asc', 1 - (isAsc ? 1 : 0));
+        });
+      };
+
+
+      selector = selector || mySelector;
+      compFunc = compFunc || myCompFunc;
+
+      init();
+    }
 </script>
 {% endblock %}

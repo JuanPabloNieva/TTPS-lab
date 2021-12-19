@@ -1,19 +1,27 @@
 {% extends 'base.html' %} {% block title %}
 <h1 class="m-3 text-center">Lotes de muestras</h1>
 {% endblock %} {% block content %}
+<a href="{% url 'Estudios' %}">Volver</a>
 {% if messages %}
 <div>
 <ul >
     {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }} messages alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
-    <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
-    </li>
+
+      {% if message.tags == 'error'  %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
     {% endfor %}
 </ul>
 </div>
 {% endif %}
 
-<table class="table table-striped" id="estudios">
+<table class="table table-striped mt-4" id="estudios">
   <thead class="thead-dark">
     <tr>
       <th scope="col">N° Lote</th>
@@ -33,20 +41,29 @@
       <td>
         {% if lote.estado == 'En procesamiento' %}
         <a
-          href="{% url 'Finalizar_Proceso' id=lote.id %}"
+          href="{% url 'Listar_Muestras' id=lote.id %}"
           class="btn btn-warning mb-2"
           >Finalizar proceso</a
         >
-        {% endif %}
+        {% else %}
         <a
+          href="{% url 'Ver_Muestras' id=lote.id %}"
+          class="btn btn-warning mb-2"
+          >Ver muestras</a
+        >
+        {% endif %}
+        <!-- <a
           href="{% url 'Listar_Muestras' id=lote.id %}"
           class="btn btn-warning mb-2"
           >Ver Muestras</a
-        >
+        > -->
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+{% if not lotes %}
+  <p class="alert alert-danger text-center">¡No hay lotes creados!</p>
+{% endif %}
 
 {% endblock %}

@@ -1,4 +1,5 @@
 from django.contrib.messages.api import error
+from django.http.request import RAISE_ERROR
 from django.shortcuts import redirect, render, HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
@@ -9,7 +10,7 @@ from datetime import date, datetime, timedelta
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from dateutil.relativedelta import relativedelta
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import message, send_mail, EmailMessage
 
 
 
@@ -60,15 +61,14 @@ def login(request):
 
 def login_paciente(request):
     if request.POST:
-        print(request.POST)
         form = LoginFormPacientes(request.POST)
         if form.is_valid():
             try:
                 paciente = Paciente.objects.get(dni=request.POST['dni'])
-                print(paciente.new)
-                if paciente.new:
-                    request.session['user_id'] = paciente.id
-                    return redirect('/pacientes/confirmar_password')
+                # print(paciente.new)
+                # if paciente.new:
+                #     request.session['user_id'] = paciente.id
+                #     return redirect('/pacientes/confirmar_password')
                 if paciente.password == request.POST['password']:
                     request.session['user_id'] = paciente.id
                     actualizar_estudios_retrasados()
@@ -76,8 +76,7 @@ def login_paciente(request):
                 else:
                     messages.error(request, '¡Contraseña invalida!'.format(paciente.nombre))
                     return render(request, 'pacientes/login.html', {'form': form})
-            except Exception as e:
-                print(e)
+            except:
                 messages.error(request, '¡Usuario invalido!')
                 return render(request, 'pacientes/login.html', {'form': form})
             return redirect('/estudios_paciente')
@@ -85,34 +84,34 @@ def login_paciente(request):
         form = LoginFormPacientes()
         return render(request, 'pacientes/login.html', {'form': form})
 
-def confirmar_password(request):
-     form = ConfirmAccountForm()
-     return render(request, 'pacientes/confirmPassword.html', {'form':form})
+# def confirmar_password(request):
+#      form = ConfirmAccountForm()
+#      return render(request, 'pacientes/confirmPassword.html', {'form':form})
 
-def check_new_password(request):
-    id_paciente = request.session['user_id']
-    form = ConfirmAccountForm()  
-    paciente = Paciente.objects.get(id=id_paciente)
-    if paciente:
-        if paciente.password == request.POST['password_actual']:
-            if request.POST['password_nuevo'] == request.POST['password_nuevo_rep']:
-                paciente.new = False
-                paciente.password = request.POST['password_nuevo']
-                paciente.save()
-                messages.success(request, 'Contraseña Cambiada con exito!')
-                return render(request, 'pacientes/estudios.html')
-            else:
-                messages.error(request, 'Los password nuevo no coinciden')
-                return render(request, 'pacientes/confirmPassword.html', {'form':form})
-        else:
-            messages.error(request, 'La contraseña actual ingresada no es valida')
-            return render(request, 'pacientes/confirmPassword.html', {'form':form})
-    else:
-        messages.error(request, 'Disculpe, hubo un error con el usuario pruebe iniciar sesión de nuevo')
-        del request.session['user_id']
-        request.session.flush()
-        form = LoginFormPacientes()
-        return render(request, 'pacientes/login.html', {'form': form})
+# def check_new_password(request):
+#     id_paciente = request.session['user_id']
+#     form = ConfirmAccountForm()  
+#     paciente = Paciente.objects.get(id=id_paciente)
+#     if paciente:
+#         if paciente.password == request.POST['password_actual']:
+#             if request.POST['password_nuevo'] == request.POST['password_nuevo_rep']:
+#                 paciente.new = False
+#                 paciente.password = request.POST['password_nuevo']
+#                 paciente.save()
+#                 messages.success(request, 'Contraseña Cambiada con exito!')
+#                 return render(request, 'pacientes/estudios.html')
+#             else:
+#                 messages.error(request, 'Los password nuevo no coinciden')
+#                 return render(request, 'pacientes/confirmPassword.html', {'form':form})
+#         else:
+#             messages.error(request, 'La contraseña actual ingresada no es valida')
+#             return render(request, 'pacientes/confirmPassword.html', {'form':form})
+#     else:
+#         messages.error(request, 'Disculpe, hubo un error con el usuario pruebe iniciar sesión de nuevo')
+#         del request.session['user_id']
+#         request.session.flush()
+#         form = LoginFormPacientes()
+#         return render(request, 'pacientes/login.html', {'form': form})
     
 
 
@@ -140,13 +139,14 @@ def logout(request):
 
 def estudios(request):
     checkeos_session_permisos(request)
-    estudios = Estudio.objects.all()
+    estudios = Estudio.objects.all().order_by('paciente__apellido')
     conf = Configuracion.objects.all().first()
     return render(request, 'estudio/index.html', {'estudios': estudios, 'conf': conf})
 
 def estudios_paciente(request):
+    checkeos_session_permisos(request)
     id_paciente = request.session['user_id']
-    estudios = Estudio.objects.filter(paciente=id_paciente)
+    estudios = Estudio.objects.filter(paciente=id_paciente).order_by('fechaAlta')
     return render(request, 'pacientes/estudios.html', {'estudios': estudios})
 
 def nuevo_estudio(request):
@@ -206,49 +206,104 @@ def editar_estudio(request, id):
         form = EstudioForm(initial_dict)
         return render(request, 'estudio/edit.html', {'form': form, 'id': id})
 
+def detalle_estudio(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.get(id=id)
+    estados = Estado.objects.all().order_by('id') #PODRIA ORDENAR POR OTRO CAMPO PARA NO TENER QUE INGRESAR EN ORDEN LOS ESTADOS
+    muestra = Muestra.objects.filter(estudio=id).exclude(error=True).first()
+    conf = Configuracion.objects.all().first()
+    return render(request, 'estudio/detalle.html', {'estudio': estudio, 'estados': estados,'id': id, 'conf': conf, 'muestra': muestra})
 
-def checkEdad(valor):
-    return valor
+import webbrowser
+def ver_consentimiento_firmado(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.get(id=id)
+    nombre = ConsentimientoFirmado.objects.filter(estudio=estudio.id).first()
+    if nombre:
+        file_path = os.path.join(settings.MEDIA_ROOT, nombre.archivo.name)
+        webbrowser.open_new(file_path)
+    else:
+        messages.error(request, '¡No se ha cargado Consentimiento informado firmado para este estudio!')
+    return redirect('/estudios/detalle/{0}'.format(id))
+
+def eliminar_consentimiento_firmado(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    consentimiento = ConsentimientoFirmado.objects.filter(estudio=estudio).first()
+    if consentimiento:
+        try:
+            Consentimiento.delete(consentimiento)
+            estudio.estado = Estado.objects.filter(detalle="3").first()
+            estudio.save()
+            messages.success(request, '¡Consentimiento eliminado con éxito!')
+        except:
+            messages.error(request, '¡No se pudo borrar el Consentimiento Informado Firmado!')
+    else:
+        messages.warning(request, '¡No se ha cargado ningún consentimiento firmado por el momento!')
+    return redirect('/estudios/detalle/{0}'.format(id))
+
+def ver_comprobante_pago(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.get(id=id)
+    nombre = Comprobante.objects.filter(estudio=estudio.id).first()
+    if nombre:
+        file_path = os.path.join(settings.MEDIA_ROOT, nombre.archivo.name)
+        webbrowser.open_new(file_path)
+    else:
+        messages.error(request, '¡No se ha cargado Comprobante de pago para este estudio!')
+    return redirect('/estudios/detalle/{0}'.format(id))
+
+def eliminar_comprobante_pago(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    comprobante = Comprobante.objects.filter(estudio=estudio).first()
+    if comprobante:
+        try:
+            Consentimiento.delete(comprobante)
+            estudio.estado = Estado.objects.filter(detalle="1").first()
+            estudio.save()
+            messages.success(request, '¡Comprobante eliminado con éxito!')
+        except:
+            messages.error(request, '¡No se pudo borrar el Comprobante de Pago!')
+    else:
+        messages.warning(request, '¡No se ha cargado ningún comprobante de pago por el momento!')
+    return redirect('/estudios/detalle/{0}'.format(id))
 
 def pacientes(request):
-    #checkeos_session_permisos(request)
+    # checkeos_session_permisos(request)
     if request.method == 'POST':
         form = PacienteForm(request.POST)
         print(form.is_valid())
         print(request.POST)
         #if form.is_valid():
-        if True:
+        # if True:
             # guardar en la BD
+        try:
+            paciente = Paciente()
+            paciente.nombre = request.POST['nombre']
+            paciente.apellido = request.POST['apellido']
+            paciente.telefono = request.POST['telefono']
+            paciente.direccion = request.POST['direccion']
+            paciente.obraSocial = ObraSocial.objects.filter(
+                id=request.POST['obraSocial']).first()
+            paciente.numeroAfiliado = random.randrange(99999)
+            paciente.password = request.POST['password']
+            paciente.email = request.POST['email']
+            existe = Paciente.objects.filter(dni=request.POST['dni']).first()
+            if existe:
+                messages.error(request, 'El dni ingresado ya se encuentra registrado en el sistema')
+            else:
+                paciente.dni = request.POST['dni']
             try:
-                paciente = Paciente()
-                paciente.nombre = request.POST['nombre']
-                paciente.apellido = request.POST['apellido']
-                paciente.telefono = request.POST['telefono']
-                paciente.obraSocial = ObraSocial.objects.filter(
-                    id=request.POST['obraSocial']).first()
-                paciente.numeroAfiliado = random.randrange(99999)
-                paciente.password = request.POST['password']
-                paciente.email = request.POST['email']
-                existe = Paciente.objects.filter(dni=request.POST['dni']).first()
-                if existe:
-                    messages.error(request, 'El dni ingresado ya se encuentra registrado en el sistema')
-                else:
-                    paciente.dni = request.POST['dni']
-                try:
-                    paciente.nombreTutor = request.POST['nombreTutor']
-                    paciente.apellidoTutor = request.POST['apellidoTutor']
-                except:
-                    print('es mayor')
-                paciente.fechaNacimiento = request.POST['fechaNacimiento']
-                #paciente.save()
-                try:
-                    email.send()
-                except Exception as e:
-                    print(e)
-                    messages.error(request, 'Paciente creado. Error al enviar email')
-                messages.success(request, '¡Paciente creado con éxito!')
+                paciente.nombreTutor = request.POST['nombreTutor']
+                paciente.apellidoTutor = request.POST['apellidoTutor']
             except:
-                messages.error(request, 'Error! No se pudo crear el paciente')
+                print('es mayor')
+            paciente.fechaNacimiento = request.POST['fechaNacimiento']
+            paciente.save()
+            messages.success(request, '¡Paciente creado con éxito!')
+        except:
+            messages.error(request, 'Error! No se pudo crear el paciente')
         user = request.session.get('user_id')
         if not user:
             return redirect('/login')
@@ -256,7 +311,7 @@ def pacientes(request):
             return redirect('/pacientes')
     else:
         form = PacienteForm()
-        pacientes = Paciente.objects.all()
+        pacientes = Paciente.objects.all().order_by('apellido')
         return render(request, "pacientes/index.html", {"pacientes": pacientes})
 
 
@@ -278,34 +333,66 @@ def eliminar_paciente(request, id):
 
     return redirect('/pacientes')
 
+def ver_perfil(request, id):
+    paciente = Paciente.objects.filter(id=id).first()
+    return render(request, 'pacientes/perfil.html', {"paciente": paciente})
 
 def editar_paciente(request, id):
     checkeos_session_permisos(request)
     if request.method == 'POST':
-        form = PacienteForm(request.POST)
-        if form.is_valid():
-            # guardar en la BD
-            try:
-                paciente = Paciente.objects.get(id=request.POST['id'])
-                paciente.nombre = request.POST['nombre']
-                paciente.apellido = request.POST['apellido']
-                paciente.telefono = request.POST['telefono']
-                paciente.dni = request.POST['dni']
-
-                obraSocial = ObraSocial.objects.filter(
-                    id=request.POST['obraSocial']).first()
-                paciente.obraSocial = obraSocial
-                paciente.save()
-                messages.success(request, '¡Paciente editado con éxito!')
-            except:
-                messages.error(request, 'Error! No se pudo editar al paciente')
-            return redirect('/pacientes')
+        try:
+            paciente = Paciente.objects.get(id=request.POST['id'])
+            paciente.nombre = request.POST['nombre']
+            paciente.apellido = request.POST['apellido']
+            paciente.telefono = request.POST['telefono']
+            paciente.dni = request.POST['dni']
+            paciente.direccion = request.POST['direccion']
+            paciente.email = request.POST['email']
+            if paciente.nombreTutor:
+                paciente.nombreTutor = request.POST['nombreTutor']
+                paciente.apellidoTutor = request.POST['apellidoTutor']
+            obraSocial = ObraSocial.objects.filter(
+                id=request.POST['obraSocial']).first()
+            paciente.obraSocial = obraSocial
+            paciente.save()
+            messages.success(request, '¡Paciente editado con éxito!')
+        except:
+            messages.error(request, 'Error! No se pudo editar al paciente')
+        
+        return redirect('/estudios_paciente')
     else:
-        form = PacienteForm()
         paciente = Paciente.objects.get(id=id)
         obras = ObraSocial.objects.all()
         return render(request, "pacientes/editar.html", {"obras": obras, "paciente": paciente})
 
+def detalle_estudio_paciente(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.get(id=id)
+    estados_permitidos=[0,2,3,4,7, 10]
+    estados = Estado.objects.all()
+    estados_paciente=[]
+
+    print(len(estados))
+
+    for i in range(len(estados)):
+        if i in estados_permitidos:
+            if i==2:
+                estados[i].nombre = "Esperando concentimiento firmado"
+            if i > 4:
+                 estados[i].nombre = "Esperando resultado"
+            if i == 10:
+                estados[i].nombre = "Resultado Completo"
+            estados_paciente.append(estados[i])
+    
+    aux = []
+    for elem in estados_paciente:
+        if elem.id >= estudio.estado.id:
+            aux.append(elem)
+
+    estado_act= aux[0]
+
+    conf = Configuracion.objects.all().first()
+    return render(request, 'pacientes/detalle.html', {'estudio': estudio, 'estados': estados_paciente,'id': id, 'conf': conf, 'estado_act':estado_act})
 
 def empleados(request):
     checkeos_session_permisos(request)
@@ -371,8 +458,8 @@ def pagar_estudios(request):
     checkeos_session_permisos(request)
     abonar = request.POST.getlist('estudios[]')
     try:
-        for id in abonar:
-            estudio = Estudio.objects.filter(id=id).first()
+        for id_abonar in abonar:
+            estudio = Estudio.objects.filter(id=id_abonar).first()
             estudio.abonado = True
             estudio.save()
         if abonar:
@@ -411,6 +498,30 @@ def cargar_comprobante(request, id):
         form = ComprobanteForm()
 
     return render(request, 'estudio/comprobante.html', {"form": form, "estudio": estudio})
+
+def cargar_comprobante_paciente(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    if request.method == 'POST':
+        form = ComprobanteForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            try:
+                comprobante = Comprobante()
+                comprobante.estudio = estudio
+                comprobante.archivo = request.FILES['archivo']
+                comprobante.save()
+                estudio.estado = Estado.objects.filter(detalle="2").first()
+                estudio.save()
+
+                messages.success(request,'¡Comprobante cargado con éxito!')
+            except:
+                messages.error(request, '¡No se pudo cargar el comprobante!')
+            return redirect('/estudios_paciente')
+    else:
+        form = ComprobanteForm()
+
+    return render(request, 'pacientes/comprobante.html', {"form": form, "estudio": estudio})
 
 
 def descargar_consentimiento(request, id):
@@ -458,6 +569,29 @@ def cargar_consentimiento(request, id):
         form = ConsentimientoForm()
 
     return render(request, 'estudio/consentimiento.html', {"form": form, "estudio": estudio})
+
+def cargar_consentimiento_paciente(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    if request.method == 'POST':
+        form = ConsentimientoForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                consentimiento = ConsentimientoFirmado()
+                consentimiento.estudio = estudio
+                consentimiento.archivo = request.FILES['archivo']
+                consentimiento.save()
+                estudio.estado = Estado.objects.filter(detalle="4").first()
+                estudio.save()
+                messages.success(request,'¡Consentimiento cargado con éxito!')
+            except:
+                messages.error(request, '¡No se pudo cargar el consentimiento!')
+
+        return redirect('/estudios_paciente')
+    else:
+        form = ConsentimientoForm()
+
+    return render(request, 'pacientes/consentimiento.html', {"form": form, "estudio": estudio})
 
 # --------------------------------------TURNO-----------------------------------------
 
@@ -517,6 +651,72 @@ def buscar_turno_por_fecha(request, id):
         form = TurnoFechaForm()
 
         return render(request, 'estudio/buscar_turno.html', {"form": form, "estudio": estudio})
+
+# --------------------------------------TURNO PACIENTES-----------------------------------------
+
+
+def seleccionar_turno_paciente(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.filter(id=id).first()
+    # HORARIOS IRIA EN SETTINGS PARA QUE SE REALICEN CAMBIOS EN UN UNICO LUGAR
+    horarios = [('09:00:00', '09:00:00'), ('09:15:00', '09:15:00'), ('09:30:00', '09:30:00'), ('09:45:00', '09:45:00'), ('10:00:00', '10:00:00'), ('10:15:00', '10:15:00'), ('10:30:00', '10:30:00'),
+                ('10:45:00', '10:45:00'), ('11:00:00', '11:00:00'), ('11:15:00', '11:15:00'), ('11:30:00', '11:30:00'), ('11:45:00', '11:45:00'), ('12:00:00', '12:00:00'), ('12:15:00', '12:15:00'), ('12:30:00', '12:30:00'), ('12:45:00', '12:45:00'), ('13:00:00', '13:00:00')]
+
+    if request.method == 'POST':
+
+        form = TurnoForm(horarios, request.POST)
+        if form.is_valid():
+            try:
+                turno = Turno()
+                turno.estudio = estudio
+                turno.fecha = request.POST['fecha']
+                turno.hora = datetime.strptime(request.POST['hora'], '%H:%M:%S')
+                turno.save()
+
+                estudio.estado = Estado.objects.filter(detalle="5").first()
+                estudio.save()
+                messages.success(request,'¡Se selecciono el turno con éxito!')
+            except:
+                messages.error(request, '¡No se pudo guardar el turno!')
+
+            return redirect('/estudios_paciente')
+        else:
+            messages.error(request, '¡Los datos ingresados no son válidos!')
+            return render(request, 'pacientes/turno.html', {"form": form, "estudio": estudio})
+    else:
+        form = TurnoForm()
+
+        return render(request, 'pacientes/turno.html', {"form": form, "estudio": estudio})
+
+
+def buscar_turno_por_fecha_paciente(request, id):
+    checkeos_session_permisos(request)
+    horarios = [('09:00:00', '09:00:00'), ('09:15:00', '09:15:00'), ('09:30:00', '09:30:00'), ('09:45:00', '09:45:00'), ('10:00:00', '10:00:00'), ('10:15:00', '10:15:00'), ('10:30:00', '10:30:00'),
+                ('10:45:00', '10:45:00'), ('11:00:00', '11:00:00'), ('11:15:00', '11:15:00'), ('11:30:00', '11:30:00'), ('11:45:00', '11:45:00'), ('12:00:00', '12:00:00'), ('12:15:00', '12:15:00'), ('12:30:00', '12:30:00'), ('12:45:00', '12:45:00'), ('13:00:00', '13:00:00')]
+
+    estudio = Estudio.objects.filter(id=id).first()
+    if request.method == 'POST':
+        formF = TurnoFechaForm(request.POST)
+        if formF.is_valid():
+            turnos_fecha = Turno.objects.filter(fecha=request.POST['fecha'])
+            for turno in turnos_fecha:
+                horarios.remove((str(turno.hora), str(turno.hora)))
+            form = TurnoForm(horarios)
+            form.fields['fecha'].initial = request.POST['fecha']
+            return render(request, 'pacientes/turno.html', {"form": form, "estudio": estudio})
+        else:
+            return render(request, 'pacientes/buscar_turno.html', {"form": formF, "estudio": estudio})
+    else:
+        form = TurnoFechaForm()
+
+        return render(request, 'pacientes/buscar_turno.html', {"form": form, "estudio": estudio})
+
+
+def ver_turnos(request, id):
+    checkeos_session_permisos(request)
+    turnos = Turno.objects.filter(estudio__paciente=id)
+    fechaActual = date.today()
+    return render(request, 'pacientes/turnos.html', {'turnos': turnos, 'fechaActual': fechaActual})
 
 # --------------------------------------MUESTRA-----------------------------------------
 
@@ -614,22 +814,46 @@ def lotes(request):
 
 
 def finalizar_proceso(request, id):
+    checkeos_session_permisos(request)
     lote = Lote.objects.filter(id=id)
     lote.update(estado='Procesado')
     muestras = Muestra.objects.filter(lote=id)
 
-    for muestra in muestras:
-        Estudio.objects.filter(id=muestra.estudio.id).update(estado="8")
-
+    try:
+        if not request.POST['urlResultado']:
+            messages.error(request, '¡La URL del resultado es obligatoria!')
+            return render(request, 'lote/lista_muestras.html', {'muestras': muestras, 'id': id})
+        for muestra in muestras:
+            if muestra.error:
+                print(muestra.estudio.paciente.nombre)
+                estudio = Estudio.objects.filter(id=muestra.estudio.id).update(estado="4")
+            else:  
+                lote.update(urlResultado=request.POST['urlResultado']) 
+                Estudio.objects.filter(id=muestra.estudio.id).update(estado="8")
+        messages.success(request, '¡Lote cerrado con éxito!')
+    except:
+        messages.error(request, '¡No se pudo cerrar el lote!')
     return redirect('/estudios')
 
 
 def listar_muestras(request, id):
     checkeos_session_permisos(request)
-    muestras = Muestra.objects.filter(lote=id)
+    muestras = Muestra.objects.filter(lote=id).order_by('estudio__paciente__apellido')
 
     return render(request, 'lote/lista_muestras.html', {'muestras': muestras, 'id': id})
 
+def ver_muestras(request, id):
+    checkeos_session_permisos(request)
+    muestras = Muestra.objects.filter(lote=id).order_by('estudio__paciente__apellido')
+    return render(request, 'lote/ver_muestras.html', {'muestras': muestras, 'id': id})
+
+def marcar_falla(request, lote_id, muestra_id):
+    checkeos_session_permisos(request)
+    muestras = Muestra.objects.all().order_by('estudio__paciente__apellido')
+    muestra = muestras.filter(id=muestra_id).first()
+    muestra.error = not muestra.error
+    muestra.save()
+    return redirect('/estudios/lote/{0}/lista_muestras'.format(lote_id))
 # -----------------------------------RESULTADOS--------------------------------------------
 
 

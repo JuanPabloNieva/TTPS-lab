@@ -55,10 +55,12 @@ class PacienteForm(forms.Form):
         attrs={'class': 'form-control', 'id': 'obraSocial'}), label='Obra Social', to_field_name='id', empty_label='--Seleccionar--')
     email = forms.CharField(label='Email', widget=forms.EmailInput(
         attrs={'class': 'form-control'}), required=True)
+    direccion = forms.CharField(label='Dirección', widget=forms.TextInput(
+        attrs={'class': 'form-control'}), required=True)
     nombreTutor = forms.CharField(label='Nombre Tutor', widget=forms.TextInput(
-        attrs={'class': 'form-control'}), empty_value='')
+        attrs={'class': 'form-control'}), required=False)
     apellidoTutor = forms.CharField(label='Apellido Tutor', widget=forms.TextInput(
-        attrs={'class': 'form-control'}), empty_value='')
+        attrs={'class': 'form-control'}), required=False)
     fechaNacimiento =  forms.DateField(label='Fecha de Nacimiento', widget=DateInput(
         attrs={'class': 'form-control', 'onchange':'checkEdad(event)'}), required=True)
     password = forms.CharField(

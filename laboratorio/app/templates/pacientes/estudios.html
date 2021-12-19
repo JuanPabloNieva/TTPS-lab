@@ -19,7 +19,7 @@
 </ul>
 </div>
 {% endif %}
-<div class="row ml-1">
+<div class="row mb-2">
   <div class="col-auto w-25">
     <input
       class="form-control"
@@ -33,29 +33,33 @@
 <table class="table table-striped" id="estudios">
   <thead class="thead-dark">
     <tr>
-      <th scope="col">Paciente</th>
-      <th scope="col">Médico Derivante</th>
-      <th scope="col">Tipo Estudio</th>
-      <th scope="col">Estado</th>
-      <th scope="col">Abonado</th>
-      <th scope="col">Retrasado</th>
-      <th scope="col">Fecha Alta</th>
-      <th scope="col">Presupuesto</th>
-      <th scope="col">Diagnostico Presuntivo</th>
-      <th scope="col">Acciones</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Médico Derivante&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Tipo Estudio&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Estado&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Abonado&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Retrasado&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Fecha Alta&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Costo&#8593&#8595</th>
+      <th class="sortable" scope="col" onclick="ordenar()" style="cursor:pointer">Diagnostico Presuntivo&#8593&#8595</th>
+      <th >Acciones</th>
     </tr>
   </thead>
   <tbody>
     {% for estudio in estudios %}
     <tr>
-      <td id="paciente">
-        {{estudio.paciente.nombre}} {{estudio.paciente.apellido}}
-      </td>
       <td>
-        {{estudio.medicoDerivante.nombre}} {{estudio.medicoDerivante.apellido}}
+        {{estudio.medicoDerivante.apellido}} {{estudio.medicoDerivante.nombre}}
       </td>
       <td>{{estudio.tipoEstudio}}</td>
+      {% if estudio.estado.detalle == "2" %}
+      <td>Esperando consentimiento informado firmado</td>
+      {% elif estudio.estado.detalle == "6" or estudio.estado.detalle == "7" or estudio.estado.detalle == "8" or estudio.estado.detalle == "9"%}
+      <td>Esperando resultado</td>
+      {% elif estudio.estado.detalle == "10"%}
+      <td>Resultado completo</td>
+      {% else %}
       <td>{{estudio.estado.nombre}}</td>
+      {% endif %}
       {% if estudio.abonado %}
       <td>SI</td>
       {% else %}
@@ -69,38 +73,15 @@
       <td>{{estudio.fechaAlta}}</td>
       <td>{{estudio.presupuesto}}</td>
       <td>{{estudio.patologia}}</td>
-      <td>
-        {% if estudio.estado.detalle == "1"%}
-          {% if not conf.modoPacienteObligado %}
-        <a
-          href="{% url 'Cargar_Comprobante' id=estudio.id %}"
-          class="btn btn-warning mb-2"
-          >Cargar comprobante</a
-        >
-          {% endif %}
-        {% elif estudio.estado.detalle == "2" %}
-        <a
-          href="{% url 'Descargar_Consentimiento' id=estudio.id %}"
-          class="btn btn-warning mb-2"
-          onclick="recargar()"
-          >Descargar consentimiento</a
-        >
-        {% elif estudio.estado.detalle == "3"%}
-          {% if not conf.modoPacienteObligado %}
-        <a href="{% url 'Cargar_Consentimiento' id=estudio.id %}" class="btn btn-warning mb-2">Cargar consentimiento</a>
-          {% endif %}
-        {% elif estudio.estado.detalle == "4"%}
-          {% if not conf.modoPacienteObligado %}
-        <a href="{% url 'Buscar_Turno' id=estudio.id %}" class="btn btn-warning mb-2">Seleccionar turno</a>
-          {% endif %}
-        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-dark mb-2">Descargar estudio</a>
-        {% endif %}
-      </td>
+     <td> <a href="{% url 'Detalle_Estudio_Paciente' id=estudio.id %}" class="btn btn-info"
+      >Ver detalle</a</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
-
+{% if not estudios %}
+  <p class="alert alert-danger text-center">¡No hay estudios realizados del paciente!</p>
+{% endif %}
 <script>
   function recargar() {
     setTimeout(function () {
@@ -126,5 +107,60 @@
       }
     }
   }
+
+  function ordenar(selector, compFunc) {
+      var mySelector = '.sortable';
+      var myCompFunc = function($td1, $td2, isAsc) {
+        var v1 = $.trim($td1.text()).replace(/,|\s+|%/g, '');
+        var v2 = $.trim($td2.text()).replace(/,|\s+|%/g, '');
+        var pattern = /^\d+(\.\d*)?$/;
+        if (pattern.test(v1) && pattern.test(v2)) {
+          v1 = parseFloat(v1);
+          v2 = parseFloat(v2);
+        }
+
+        return isAsc ? v1 > v2 : v1 < v2;
+      };
+
+      var doSort = function($tbody, index, compFunc, isAsc)
+      {
+        var $trList = $tbody.find("tr");
+        var len = $trList.length;
+        for(var i=0; i<len-1; i++) {
+          for(var j=0; j<len-i-1; j++) {
+            var $td1 = $trList.eq(j).find("td").eq(index);
+            var $td2 = $trList.eq(j+1).find("td").eq(index);
+
+            if (compFunc($td1, $td2, isAsc)) {
+              var t = $trList.eq(j+1);
+              $trList.eq(j).insertAfter(t);
+              $trList = $tbody.find("tr");
+            }
+          }
+        }
+      }
+
+      var init = function() {
+        var $th = $("th" + selector);
+        this.$table = $th.closest("table");
+        var that = this;
+        $th.click(function(){
+          var index = $(this).index();
+          var asc = $(this).attr('data-asc');
+          isAsc = asc === undefined ? true : (asc > 0 ? true : false);
+
+          doSort(that.$table.find("tbody"), index, compFunc, isAsc);
+
+          $(this).attr('data-asc', 1 - (isAsc ? 1 : 0));
+        });
+      };
+
+
+      selector = selector || mySelector;
+      compFunc = compFunc || myCompFunc;
+
+      init();
+    }
+
 </script>
 {% endblock %}
