@@ -360,6 +360,34 @@ def editar_paciente(request, id):
         obras = ObraSocial.objects.all()
         return render(request, "pacientes/editar.html", {"obras": obras, "paciente": paciente})
 
+def detalle_estudio_paciente(request, id):
+    checkeos_session_permisos(request)
+    estudio = Estudio.objects.get(id=id)
+    estados_permitidos=[0,2,3,4,7, 10]
+    estados = Estado.objects.all()
+    estados_paciente=[]
+
+    print(len(estados))
+
+    for i in range(len(estados)):
+        if i in estados_permitidos:
+            if i==2:
+                estados[i].nombre = "Esperando concentimiento firmado"
+            if i > 4:
+                 estados[i].nombre = "Esperando resultado"
+            if i == 10:
+                estados[i].nombre = "Resultado Completo"
+            estados_paciente.append(estados[i])
+    
+    aux = []
+    for elem in estados_paciente:
+        if elem.id >= estudio.estado.id:
+            aux.append(elem)
+
+    estado_act= aux[0]
+
+    conf = Configuracion.objects.all().first()
+    return render(request, 'pacientes/detalle.html', {'estudio': estudio, 'estados': estados_paciente,'id': id, 'conf': conf, 'estado_act':estado_act})
 
 def empleados(request):
     checkeos_session_permisos(request)

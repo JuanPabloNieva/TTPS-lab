@@ -39,6 +39,7 @@ urlpatterns = [
     path('pacientes/editar/<id>', views.editar_paciente),
 #     path('pacientes/confirmar_password', views.confirmar_password, name="Confirmar Password"),
 #     path('pacientes/check_nuevo_password', views.check_new_password, name="Check Password"),
+    path('pacientes/detalle/<id>', views.detalle_estudio_paciente, name='Detalle_Estudio_Paciente'),
     path('historial', views.historial, name='Historial'),
     path('historial/nuevo/<id>', views.nuevo_historial, name="Agregar Historial"),
     path('historial/paciente/<id>', views.historial_paciente),

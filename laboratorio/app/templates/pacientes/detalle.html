@@ -1,0 +1,78 @@
+{% extends 'basePacientes.html' %}{% block title %}
+<h1 class="m-3 text-center">Detalle</h1>
+{% endblock %} 
+{% block content %}
+{% if messages %}
+<div>
+<ul >
+    {% for message in messages %}
+
+      {% if message.tags == 'error'  %}
+      <li{% if message.tags %} class="{{ message.tags }} messages alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+        <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </li>
+      {% else %}
+      <li{% if message.tags %} class="messages alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center justify-content-between" role="alert" {% endif %}>{{ message }}
+      <button type="button" class="btn btn-danger btn-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+      </li>
+      {% endif %}
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
+<a href="{% url 'Estudios_Paciente' %}" class="mb-5">Volver</a>
+<div class="d-flex flex-column border border-info table-secondary p-3 m-4">
+    <div class="d-flex justify-content-around mt-3">
+      <div class="d-flex flex-column align-items-center w-100">
+        <h2 class="text-info"><strong>Paciente</strong></h2>
+        <p class=""><em>{{ estudio.paciente.nombre }} {{ estudio.paciente.apellido }}</em></p>
+      </div>
+      <div class="d-flex flex-column align-items-center w-100">
+        <h2 class=" text-info"><strong>Médico Derivante</strong></h2>
+        <p class=""><em>{{ estudio.medicoDerivante.nombre }} {{ estudio.medicoDerivante.apellido }}</em></p>
+      </div>
+    </div>
+    <div class="d-flex justify-content-around mt-3">
+      <div class="d-flex flex-column align-items-center w-100">
+        <h2 class="text-info"><strong>Estado</strong></h2>
+        <p class=""><em>{{ estado_act.nombre }}</em></p>
+      </div>
+      <div class="d-flex flex-column align-items-center w-100">
+        <h2 class="text-info"><strong>Tipo de estudio</strong></h2>
+        <p class=""><em>{{ estudio.tipoEstudio }}</em></p>
+      </div>
+    </div>
+    <div class="d-flex justify-content-around mt-3">
+      <div class="d-flex flex-column align-items-center w-100">
+        <h2 class="text-info"><strong>Diag. Presuntivo</strong></h2>
+        <p class=""><em>{{ estudio.patologia }}</em></p>
+      </div>
+      <div class="d-flex flex-column align-items-center w-100">
+        <h2 class="text-info"><strong>Fecha de alta</strong></h2>
+        <p class=""><em>{{ estudio.fechaAlta }}</em></p>
+      </div>
+    </div>
+    <div class="d-flex flex-column mt-3">
+      <h2 class="m-auto text-info"><strong>Workflow</strong></h2>
+      <div class="m-auto d-flex">
+        <p class="table-success p-2 text-center text-dark"><small>Estado que paso</small></p>
+        <p class="table-warning p-2 text-center text-dark"><small>Estado actual</small></p>
+        <p class="table-danger p-2 text-center text-dark"><small>Estado que falta</small></p>  
+      </div>
+      <div class="m-auto">
+        <ol class="bg-white m-4">
+          {% for estado in estados %}
+            {% if estado.id < estudio.estado.id %}
+              <li class="table-success text-dark p-1"><del>{{ estado.nombre }}</del></li>
+            {% elif estado.id == estado_act.id %}
+              <li class="table-warning text-dark p-1"><strong>{{ estado.nombre }}</strong></li>
+            {% else %}
+              <li class="table-danger text-dark p-1">{{ estado.nombre }}</li>
+            {% endif %}
+          {% endfor %}
+          </ol>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
