@@ -82,7 +82,11 @@
   </div>
   <div class="d-flex justify-content-center">
     <div class="d-flex flex-column justify-content-around">
+      {% if comp %}
+      <a href="{{comp.url}}" target="blank" class="btn btn-info m-2">Ver <strong>COMPROBANTE DE PAGO</strong></a>
+      {% else %}
       <a href="{% url 'Comprobante_Pago' id=estudio.id %}" class="btn btn-info m-2">Ver <strong>COMPROBANTE DE PAGO</strong></a>
+      {% endif %}
       {% if estudio.estado.id < 4 %}
         <!-- <a href="#" class="btn btn-danger m-2">Marcar <strong>COMPROBANTE INVALIDO</strong></a>  -->
         <!-- Button trigger modal -->
@@ -98,92 +102,97 @@
       {% endif %}
     </div>
     <div class="d-flex flex-column justify-content-around">
-      <a href="{% url 'Consentimiento_Firmado' id=estudio.id %}" class="btn btn-info m-2">Ver <strong>CONSENTIMIENTO FIRMADO</strong></a>
-      {% if estudio.estado.id < 5 %}
-        <!-- <a href="#" class="btn btn-danger m-2">Marcar <strong>CONSENTIMIENTO INVALIDO</strong></a>  -->
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#consentimiento">
-          Eliminar <strong>CONSENTIMIENTO INVALIDO</strong>
-        </button>
+      <div class="h-100">
+      {% if cons %}
+      <a href="{{cons.url}}" target="blank" class="btn btn-info m-2">Ver <strong>CONSENTIMIENTO FIRMADO</strong></a>
       {% else %}
-        <!-- <a href="#" class="btn btn-danger m-2 disabled">Marcar <strong>CONSENTIMIENTO INVALIDO</strong></a>  -->
+      <a href="{% url 'Consentimiento_Firmado' id=estudio.id %}" class="btn btn-info m-2">Ver <strong>CONSENTIMIENTO FIRMADO</strong></a>
+      {% endif %}
+      </div>
+      <!-- {% if estudio.estado.id < 5 %} -->
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-danger m-2 disabled">
+        <!-- <button type="button" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#consentimiento"> -->
+          <!-- Eliminar <strong>CONSENTIMIENTO INVALIDO</strong> -->
+        <!-- </button>
+      {% else %} -->
+        <!-- Button trigger modal -->
+        <!-- <button type="button" class="btn btn-danger m-2 disabled">
           Eliminar <strong>CONSENTIMIENTO INVALIDO</strong>
         </button>
-      {% endif %}
+      {% endif %} -->
     </div>
     <div class="d-flex flex-column justify-content-around">
       {% if estudio.estado.detalle == "1"%}
           {% if not conf.modoPacienteObligado %}
             <a
               href="{% url 'Cargar_Comprobante' id=estudio.id %}"
-              class="btn btn-success mb-2"
+              class="btn btn-success m-2"
               >Cargar comprobante</a
             >
           {% else %}
             <a
               href="#"
-              class="btn btn-success mb-2 disabled"
+              class="btn btn-success m-2 disabled"
               >Cargar comprobante</a
             >
           {% endif %}
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning m-2"
           >Editar</a
         >
         {% elif estudio.estado.detalle == "2" %}
+        <!-- <a href="{{ consentimiento.url }}" class="btn btn-success mb-2" download="ConsentimientoInformado">Descargar Consentimiento</a> -->
         <a
           href="{% url 'Descargar_Consentimiento' id=estudio.id %}"
-          class="btn btn-success mb-2"
+          class="btn btn-success m-2"
           onclick="recargar()"
           >Descargar consentimiento</a
         >
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning m-2"
           >Editar</a
         >
         {% elif estudio.estado.detalle == "3"%}
           {% if not conf.modoPacienteObligado %}
-            <a href="{% url 'Cargar_Consentimiento' id=estudio.id %}" class="btn btn-success mb-2">Cargar consentimiento</a>
+            <a href="{% url 'Cargar_Consentimiento' id=estudio.id %}" class="btn btn-success m-2">Cargar consentimiento</a>
           {% else %}
             <a
               href="#"
-              class="btn btn-success mb-2 disabled"
+              class="btn btn-success m-2 disabled"
               >Cargar consentimiento</a
             >
           {% endif %}
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning m-2"
           >Editar</a
         >
         {% elif estudio.estado.detalle == "4"%}
           {% if not conf.modoPacienteObligado %}
-            <a href="{% url 'Buscar_Turno' id=estudio.id %}" class="btn btn-success mb-2">Seleccionar turno</a>
+            <a href="{% url 'Buscar_Turno' id=estudio.id %}" class="btn btn-success m-2">Seleccionar turno</a>
           {% else %}
             <a
               href="#"
-              class="btn btn-success mb-2 disabled"
+              class="btn btn-success m-2 disabled"
               >Seleccionar turno</a
             >
           {% endif %}
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning m-2"
           >Editar</a
         >
         {% elif estudio.estado.detalle == "5" %}
-        <a href="{% url 'Cargar_Muestra' id=estudio.id %}" class="btn btn-success mb-2">Cargar muestra</a>
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+        <a href="{% url 'Cargar_Muestra' id=estudio.id %}" class="btn btn-success m-2">Cargar muestra</a>
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning m-2"
           >Editar</a
         >
         {% elif estudio.estado.detalle == "6" %}
-        <a href="{% url 'Retiro_Muestra' id=estudio.id %}" class="btn btn-success mb-2">Cargar retiro muestra</a>
-        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning"
+        <a href="{% url 'Retiro_Muestra' id=estudio.id %}" class="btn btn-success m-2">Cargar retiro muestra</a>
+        <a href="{% url 'Editar_Estudio' id=estudio.id %}" class="btn btn-warning m-2"
           >Editar</a
         >
         {% elif estudio.estado.detalle == "8" %}
-        <a href="{% url 'Cargar_Interpretacion' id=estudio.id %}" class="btn btn-success mb-2">Cargar interpretación</a>
+        <a href="{% url 'Cargar_Interpretacion' id=estudio.id %}" class="btn btn-success m-2">Cargar interpretación</a>
         {% elif estudio.estado.detalle == "9" %}
-        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-success mb-2">Descargar estudio</a>
-        <a href="{% url 'Resultado_Entregado' id=estudio.id %}" class="btn btn-success mb-2">Resultado entregado</a>
+        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-success m-2">Descargar estudio</a>
+        <a href="{% url 'Resultado_Entregado' id=estudio.id %}" class="btn btn-success m-2">Resultado entregado</a>
         {% elif estudio.estado.detalle == "10" %}
-        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-success mb-2 onclick="recargar()"">Descargar estudio</a>
+        <a href="{% url 'Descargar_Estudio' id=estudio.id %}" class="btn btn-success m-2 onclick="recargar()"">Descargar estudio</a>
         {% endif %}
     </div>
   </div>

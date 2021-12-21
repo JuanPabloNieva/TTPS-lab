@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.fields import DateField
+from django.db.models.fields import DateField, URLField
 from django.db.models.fields.related import ForeignKey
 
 # Create your models here.
@@ -137,13 +137,15 @@ class Estado(models.Model):
 class Comprobante(models.Model):
     id = models.AutoField(primary_key=True)
     estudio = models.ForeignKey('Estudio', on_delete=models.RESTRICT)
-    archivo = models.FileField(upload_to='comprobantes/')
+    archivo = models.FileField(upload_to='comprobantes/', max_length=1000)
+    url = models.CharField(max_length=1000, default='')
 
 
 class Consentimiento(models.Model):
     id = models.AutoField(primary_key=True)
     tipoEstudio = models.ForeignKey('TipoEstudio', on_delete=models.RESTRICT)
-    archivo = models.FileField(upload_to='consentimientos/')
+    archivo = models.FileField(upload_to='consentimientos/', max_length=1000)
+    url = models.CharField(max_length=1000, default='')
 
     def __str__(self):
         return '{0}'.format(self.tipoEstudio)
@@ -152,7 +154,8 @@ class Consentimiento(models.Model):
 class ConsentimientoFirmado(models.Model):
     id = models.AutoField(primary_key=True)
     estudio = models.ForeignKey('Estudio', on_delete=models.RESTRICT)
-    archivo = models.FileField(upload_to='consentimientosFirmados/')
+    archivo = models.FileField(upload_to='consentimientosFirmados/', max_length=1000)
+    url = models.CharField(max_length=1000, default='')
 
     def __str__(self):
         return '{0}'.format(self.estudio)

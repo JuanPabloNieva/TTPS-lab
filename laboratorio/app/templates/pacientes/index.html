@@ -44,8 +44,13 @@
       <td>{{paciente.nombre}}</td>
       <td>{{paciente.dni}}</td>
       <td>{{paciente.telefono}}</td>
+      {% if paciente.obraSocial %}
       <td>{{paciente.numeroAfiliado}}</td>
       <td>{{paciente.obraSocial.nombre}}</td>
+      {% else %}
+      <td ><em>No tiene</em></td>
+      <td ><em>No tiene</em></td>
+      {% endif %}
       <td>
         <a href="historial/paciente/{{paciente.id}}">Ver</a>
       </td>

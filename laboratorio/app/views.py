@@ -12,7 +12,7 @@ from reportlab.lib.pagesizes import A4
 from dateutil.relativedelta import relativedelta
 from django.core.mail import message, send_mail, EmailMessage
 
-
+from app.helpers.Firebase import storage
 
 from plotly.offline import plot
 import plotly.graph_objects as go
@@ -211,8 +211,11 @@ def detalle_estudio(request, id):
     estudio = Estudio.objects.get(id=id)
     estados = Estado.objects.all().order_by('id') #PODRIA ORDENAR POR OTRO CAMPO PARA NO TENER QUE INGRESAR EN ORDEN LOS ESTADOS
     muestra = Muestra.objects.filter(estudio=id).exclude(error=True).first()
+    cons = ConsentimientoFirmado.objects.filter(estudio=id).first()
+    comp = Comprobante.objects.filter(estudio=id).first()
+    consentimiento = Consentimiento.objects.filter(tipoEstudio=estudio.tipoEstudio).first()
     conf = Configuracion.objects.all().first()
-    return render(request, 'estudio/detalle.html', {'estudio': estudio, 'estados': estados,'id': id, 'conf': conf, 'muestra': muestra})
+    return render(request, 'estudio/detalle.html', {'estudio': estudio, 'estados': estados,'id': id, 'comp': comp, 'cons': cons,'conf': conf, 'muestra': muestra, 'consentimiento': consentimiento})
 
 import webbrowser
 def ver_consentimiento_firmado(request, id):
@@ -247,8 +250,9 @@ def ver_comprobante_pago(request, id):
     estudio = Estudio.objects.get(id=id)
     nombre = Comprobante.objects.filter(estudio=estudio.id).first()
     if nombre:
-        file_path = os.path.join(settings.MEDIA_ROOT, nombre.archivo.name)
-        webbrowser.open_new(file_path)
+        # file_path = os.path.join(settings.MEDIA_ROOT, nombre.archivo.name)
+        # webbrowser.open_new(file_path)
+        pass
     else:
         messages.error(request, '¡No se ha cargado Comprobante de pago para este estudio!')
     return redirect('/estudios/detalle/{0}'.format(id))
@@ -441,7 +445,7 @@ def historial_paciente(request, id):
 def pendientes(request):
     checkeos_session_permisos(request)
     estudiosPendientes = []
-    estudiosSinAbonar = Estudio.objects.filter(abonado=False)
+    estudiosSinAbonar = Estudio.objects.filter(abonado=False).exclude(estado__detalle="11")
 
     for estudio in estudiosSinAbonar:
         if int(estudio.estado.detalle) > 5:
@@ -485,6 +489,12 @@ def cargar_comprobante(request, id):
                 estudio.estado = Estado.objects.filter(detalle="2").first()
                 estudio.save()
 
+                #Cargar en firebase y guardar la url
+                storage.child(comprobante.archivo.name).put(os.path.join(settings.MEDIA_ROOT, comprobante.archivo.name))
+                url_path = storage.child(comprobante.archivo.name).get_url(token=0)
+                comprobante.url = url_path
+                comprobante.save()
+                
                 messages.success(request,'¡Comprobante cargado con éxito!')
             except:
                 messages.error(request, '¡No se pudo cargar el comprobante!')
@@ -509,6 +519,12 @@ def cargar_comprobante_paciente(request, id):
                 estudio.estado = Estado.objects.filter(detalle="2").first()
                 estudio.save()
 
+                #Cargar en firebase y guardar la url
+                storage.child(comprobante.archivo.name).put(os.path.join(settings.MEDIA_ROOT, comprobante.archivo.name))
+                url_path = storage.child(comprobante.archivo.name).get_url(token=0)
+                comprobante.url = url_path
+                comprobante.save()
+
                 messages.success(request,'¡Comprobante cargado con éxito!')
             except:
                 messages.error(request, '¡No se pudo cargar el comprobante!')
@@ -519,20 +535,26 @@ def cargar_comprobante_paciente(request, id):
     return render(request, 'pacientes/comprobante.html', {"form": form, "estudio": estudio})
 
 
+# def descargar_consentimiento(request, id):
+#     checkeos_session_permisos(request)
+#     estudio = Estudio.objects.filter(id=id).first()
+#     consentimiento = Consentimiento.objects.filter(
+#         tipoEstudio=estudio.tipoEstudio).first()
+#     file_path = os.path.join(settings.MEDIA_ROOT, consentimiento.archivo.name)
+#     with open(file_path, 'rb') as fh:
+#         response = HttpResponse(fh.read(), content_type="application/pdf")
+#         response['Content-Disposition'] = 'attachment; filename={0}'.format(\
+#             os.path.basename(file_path))
+#         estudio.estado = Estado.objects.filter(detalle="3").first()
+#         estudio.save()
+#     return response
+
 def descargar_consentimiento(request, id):
     checkeos_session_permisos(request)
     estudio = Estudio.objects.filter(id=id).first()
     consentimiento = Consentimiento.objects.filter(
         tipoEstudio=estudio.tipoEstudio).first()
-    file_path = os.path.join(settings.MEDIA_ROOT, consentimiento.archivo.name)
-    # if os.path.exists(file_path):
-    #     with open(file_path, 'rb') as fh:
-    #         response = HttpResponse(fh.read(), content_type="application/pdf")
-    #         response['Content-Disposition'] = 'attachment; filename={0}'.format(\
-    #             os.path.basename(file_path))
-    #         estudio.estado = Estado.objects.filter(detalle="3").first()
-    #         estudio.save()
-    #     return response
+    file_path = os.path.join(settings.STATIC_ROOT, consentimiento.archivo.name)
     with open(file_path, 'rb') as fh:
         response = HttpResponse(fh.read(), content_type="application/pdf")
         response['Content-Disposition'] = 'attachment; filename={0}'.format(\
@@ -540,7 +562,6 @@ def descargar_consentimiento(request, id):
         estudio.estado = Estado.objects.filter(detalle="3").first()
         estudio.save()
     return response
-
 
 def cargar_consentimiento(request, id):
     checkeos_session_permisos(request)
@@ -555,6 +576,13 @@ def cargar_consentimiento(request, id):
                 consentimiento.save()
                 estudio.estado = Estado.objects.filter(detalle="4").first()
                 estudio.save()
+
+                #Cargar en firebase y guardar la url
+                storage.child(consentimiento.archivo.name).put(os.path.join(settings.MEDIA_ROOT, consentimiento.archivo.name))
+                url_path = storage.child(consentimiento.archivo.name).get_url(token=0)
+                consentimiento.url = url_path
+                consentimiento.save()
+
                 messages.success(request,'¡Consentimiento cargado con éxito!')
             except:
                 messages.error(request, '¡No se pudo cargar el consentimiento!')
@@ -578,6 +606,13 @@ def cargar_consentimiento_paciente(request, id):
                 consentimiento.save()
                 estudio.estado = Estado.objects.filter(detalle="4").first()
                 estudio.save()
+
+                #Cargar en firebase y guardar la url
+                storage.child(consentimiento.archivo.name).put(os.path.join(settings.MEDIA_ROOT, consentimiento.archivo.name))
+                url_path = storage.child(consentimiento.archivo.name).get_url(token=0)
+                consentimiento.url = url_path
+                consentimiento.save()
+
                 messages.success(request,'¡Consentimiento cargado con éxito!')
             except:
                 messages.error(request, '¡No se pudo cargar el consentimiento!')
@@ -760,7 +795,7 @@ def retiro_muestra(request, id):
 
         if form.is_valid():
             try:
-                muestra = Muestra.objects.get(estudio=estudio)
+                muestra = Muestra.objects.filter(estudio=estudio).exclude(error=True).first()
                 ahora = date.today()
                 #Si pasaron 30 dias la muestra se vencio
                 if muestra.fechaAlta <= (ahora - timedelta(days=30)):
@@ -813,7 +848,7 @@ def finalizar_proceso(request, id):
     lote = Lote.objects.filter(id=id)
     lote.update(estado='Procesado')
     muestras = Muestra.objects.filter(lote=id)
-
+    
     try:
         if not request.POST['urlResultado']:
             messages.error(request, '¡La URL del resultado es obligatoria!')
@@ -821,6 +856,7 @@ def finalizar_proceso(request, id):
         for muestra in muestras:
             if muestra.error:
                 print(muestra.estudio.paciente.nombre)
+                Turno.objects.filter(estudio=muestra.estudio).delete()
                 estudio = Estudio.objects.filter(id=muestra.estudio.id).update(estado="4")
             else:  
                 lote.update(urlResultado=request.POST['urlResultado']) 
